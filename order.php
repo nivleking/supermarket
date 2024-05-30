@@ -8,7 +8,7 @@ if (isset($_POST['ship_mode'])) {
     $selectedMode = $_POST['ship_mode'];
 
     // Aggregation pipeline
-    $maxResponseTimePipeline = [
+    $responseTimePipeline = [
         [
             '$project' => [
                 'ship_mode' => 1,
@@ -25,36 +25,38 @@ if (isset($_POST['ship_mode'])) {
         ]
     ];
     if ($selectedMode !== 'all') {
-        $maxResponseTimePipeline[] = [
-            '$match' => [
-                'ship_mode' => $selectedMode
-            ]
+        $responseTimePipeline[] = [
+            '$match' => ['ship_mode' => $selectedMode]
         ];
-        $maxResponseTimePipeline[] = [
-            '$group' => [
-                '_id' => '$ship_mode',
-                'max_diff_days' => ['$max' => '$diff_days']
-            ]
-        ];
-    } else {
-        $maxResponseTimePipeline[] = [
-            '$group' => [
-                '_id' => null,
-                'max_diff_days' => ['$max' => '$diff_days']
-            ]
-        ];
+    }
+    $responseTimePipeline[] = [
+        '$group' => [
+            '_id' => '$ship_mode',
+            'max_diff_days' => ['$max' => '$diff_days'],
+            'avg_diff_days' => ['$avg' => '$diff_days'],
+            'min_diff_days' => ['$min' => '$diff_days']
+        ]
+    ];
+    if ($selectedMode === 'all') {
+        $responseTimePipeline[count($responseTimePipeline) - 1]['$group']['_id'] = null; 
     }
 
     try {
-        $maxResponseTimes = $transaksi->aggregate($maxResponseTimePipeline);
-        $maxResponseTime = $maxResponseTimes->toArray()[0]->max_diff_days ?? 0;
-        echo json_encode(['max_diff_days' => $maxResponseTime]);
+        $responseTimes = $transaksi->aggregate($responseTimePipeline);
+        $responseTimesArray = $responseTimes->toArray()[0];
+        $response = [
+            'max_diff_days' => $responseTimesArray->max_diff_days ?? 0,
+            'avg_diff_days' => round($responseTimesArray->avg_diff_days ?? 0, 2),
+            'min_diff_days' => $responseTimesArray->min_diff_days ?? 0,
+        ];
+        echo json_encode($response);
     } catch (Exception $e) {
         echo json_encode(['error' => $e->getMessage()]);
     }
-    exit;
+    exit;    
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -86,32 +88,33 @@ if (isset($_POST['ship_mode'])) {
             <!-- Title Box -->
             <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start">
                 <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">Statistic Report for Response Time</h1>
-                <select id="ship_mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
-                    <option selected value="-">Select Ship Mode</option>
+                <select id="ship_mode" aria-label="Select Ship Mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
+                    <option value="" disabled selected>Select Ship Mode</option>
                     <option value="all">All Ship Mode</option>
                     <?php foreach($ship_modes as $mode): ?>
                         <option value="<?= $mode ?>"><?= $mode ?></option>
                     <?php endforeach; ?>
                 </select>
+
             </div>
 
             <!-- Row of Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Card 1 -->
                 <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
-                    <div class="text-4xl font-bold text-center text-gray-800" id="avgResponseTime">0</div>
+                    <div class="text-4xl font-bold text-center text-gray-800" id="avgResponseTime">-</div>
                     <div class="text-center text-gray-500">Average Response Time</div>
                 </div>
 
                 <!-- Card 2 -->
                 <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
-                    <div class="text-4xl font-bold text-center text-gray-800" id="maxResponseTime">0</div>
+                    <div class="text-4xl font-bold text-center text-gray-800" id="maxResponseTime">-</div>
                     <div class="text-center text-gray-500">Max Response Time</div>
                 </div>
 
                 <!-- Card 3 -->
                 <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
-                    <div class="text-4xl font-bold text-center text-gray-800" id="minResponseTime">0</div>
+                    <div class="text-4xl font-bold text-center text-gray-800" id="minResponseTime">-</div>
                     <div class="text-center text-gray-500">Min Response Time</div>
                 </div>
             </div>
@@ -138,19 +141,21 @@ if (isset($_POST['ship_mode'])) {
                     data: {ship_mode: selectedMode},
                     success: function(response) {
                         var data = JSON.parse(response);
-                        console.log(data);
                         setTimeout(function() {
                             $('#maxResponseTime').text(data.max_diff_days);
+                            $('#avgResponseTime').text(parseFloat(data.avg_diff_days).toFixed(2)); 
+                            $('#minResponseTime').text(data.min_diff_days);
                             Swal.close();
                         }, 1500);
                     },
                     error: function() {
-                        alert('Error fetching data');
+                        Swal.fire('Error', 'Error fetching data', 'error');
                     }
                 });
             });
         })
     </script>
+
 </body>
 
 </html>
