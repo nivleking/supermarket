@@ -1,6 +1,7 @@
 <?php 
 require_once "connect.php";
 
+
 $transaksi = $client->supermarket->transactions;
 $ship_modes = $transaksi->distinct("ship_mode");
 
@@ -13,6 +14,7 @@ function getTotalTransactions($shipMode, $transaksi) {
     }
     return $count;
 }
+
 
 
 
