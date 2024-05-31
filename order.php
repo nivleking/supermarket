@@ -236,6 +236,8 @@ if (isset($_POST['ship_mode'])) {
                     title: 'Loading...',
                     text: 'Please wait while we fetch the data',
                     allowOutsideClick: false,
+                    timer: 1500,
+                    timerProgressBar: true,
                     didOpen: () => {
                         Swal.showLoading();
                     }
