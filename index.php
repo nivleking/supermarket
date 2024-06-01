@@ -22,7 +22,7 @@ include 'connect.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <?php include 'components/headers.php'; ?>
 </head>
 
 <body>
@@ -110,8 +110,6 @@ include 'connect.php';
             },
         });
     </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 </body>
 
 </html>

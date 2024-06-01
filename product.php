@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "connect.php";
 $query = "MATCH (p:Product) RETURN p ORDER BY p.product_name";
 $results = $clientNeo->run($query, [], 'default', 'Proyek');
@@ -46,17 +46,12 @@ if (isset($_POST['product_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
-    <!-- CDN for jquery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <?php include 'components/headers.php'; ?>
     <style>
-    .choices {
-        width: 25% !important;
-    }
-</style>
+        .choices {
+            width: 25% !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
@@ -77,14 +72,14 @@ if (isset($_POST['product_id'])) {
                     <option value="">Choose Product...</option>
                     <?php foreach ($results as $result) {
                         $node = $result->get('p');
-                        echo "<option value='".$node->getProperty('product_id')."'>".$node->getProperty('product_name') ."</option>";
-                    }?>
+                        echo "<option value='" . $node->getProperty('product_id') . "'>" . $node->getProperty('product_name') . "</option>";
+                    } ?>
                 </select>
 
 
             </div>
             <div class="grid grid-cols-1 mt-4 md:grid-cols-2 gap-4">
-                
+
                 <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
                     <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Related Product By Quantity Sold</h1>
                     <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
@@ -100,11 +95,8 @@ if (isset($_POST['product_id'])) {
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             const ctx = document.getElementById('chart1').getContext('2d');
             let myChart;
             const element = $("#selectProduct").get(0);
@@ -134,25 +126,31 @@ if (isset($_POST['product_id'])) {
                             label: label,
                             data: data.map(item => item.total_quantity),
                             backgroundColor: '#19376D',
-                            borderColor: '#19376D', 
+                            borderColor: '#19376D',
                             borderWidth: 1
                         }]
                     },
                     options: {
-                        indexAxis: 'y', 
+                        indexAxis: 'y',
                         scales: {
                             x: {
                                 beginAtZero: true,
-                                grid: { display: false } 
+                                grid: {
+                                    display: false
+                                }
                             },
                             y: {
-                                grid: { display: false }
+                                grid: {
+                                    display: false
+                                }
                             }
                         },
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: false }, 
+                            legend: {
+                                display: false
+                            },
                             tooltip: {
                                 enabled: true,
                                 callbacks: {
@@ -185,12 +183,15 @@ if (isset($_POST['product_id'])) {
                     });
                     $.ajax({
                         type: 'POST',
-                        data: { product_id: productId, analysis_type: 'quantity_sold' },
+                        data: {
+                            product_id: productId,
+                            analysis_type: 'quantity_sold'
+                        },
                         dataType: 'json',
                         success: function(data) {
-                            setTimeout(() => { 
+                            setTimeout(() => {
                                 updateChart('chart1', data);
-                                Swal.close(); 
+                                Swal.close();
                             }, 2000);
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -200,12 +201,15 @@ if (isset($_POST['product_id'])) {
                     });
                     $.ajax({
                         type: 'POST',
-                        data: { product_id: productId, analysis_type: 'market_basket' },
+                        data: {
+                            product_id: productId,
+                            analysis_type: 'market_basket'
+                        },
                         dataType: 'json',
                         success: function(data) {
                             setTimeout(() => {
                                 updateChart('chart2', data);
-                                Swal.close(); 
+                                Swal.close();
                             }, 2000);
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
