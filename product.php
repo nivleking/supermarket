@@ -1,41 +1,70 @@
 <?php
 require_once "connect.php";
+
+// Load initial product list for dropdown
 $query = "MATCH (p:Product) RETURN p ORDER BY p.product_name";
 $results = $clientNeo->run($query, [], 'default', 'Proyek');
 
-if (isset($_POST['product_id'])) {
+if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
     $productId = $_POST['product_id'];
-    $analysisType = $_POST['analysis_type'] ?? 'quantity_sold';
+    $analysisType = $_POST['analysis_type'];
+    if (in_array($analysisType, ['quantity_sold', 'market_basket'])) {
+        switch ($analysisType) {
+            case 'quantity_sold':
+                $query = "MATCH (p:Product {product_id: '$productId'})<-[:BUY]-(t:Transaction)
+                        MATCH (t)-[r:BUY]->(p2:Product)
+                        WHERE p2.product_id <> '$productId'
+                        RETURN p2.product_name AS product_name, SUM(r.quantity) AS total_quantity
+                        ORDER BY total_quantity DESC
+                        LIMIT 5;";
+                break;
 
-    if ($analysisType == 'quantity_sold') {
-        $query = "MATCH (p:Product {product_id: '$productId'})<-[:BUY]-(t:Transaction)
-                MATCH (t)-[r:BUY]->(p2:Product)
-                WHERE p2.product_id <> '$productId'
-                RETURN p2.product_name AS product_name, SUM(r.quantity) AS total_quantity
-                ORDER BY total_quantity DESC
-                LIMIT 5;";
-    } else if ($analysisType == 'market_basket') {
-        $query = "MATCH (p:Product {product_id: '$productId'})
-                MATCH (t:Transaction)-[:BUY]->(p)
-                MATCH (t)-[:BUY]->(p2:Product)
-                WHERE p2.product_id <> '$productId'
-                RETURN p2.product_name AS product_name, COUNT(*) AS total_quantity
-                ORDER BY total_quantity DESC
-                LIMIT 5;";
+            case 'market_basket':
+                $query = "MATCH (p:Product {product_id: '$productId'})
+                        MATCH (t:Transaction)-[:BUY]->(p)
+                        MATCH (t)-[:BUY]->(p2:Product)
+                        WHERE p2.product_id <> '$productId'
+                        RETURN p2.product_name AS product_name, COUNT(*) AS total_quantity
+                        ORDER BY total_quantity DESC
+                        LIMIT 5;";
+                break;
+        }
+
+        $results = $clientNeo->run($query);
+        $data = [];
+        foreach ($results as $result) {
+            $data[] = [
+                'product_name' => $result->get('product_name', 'N/A'),
+                'total_quantity' => $result->get('total_quantity', 0)
+            ];
+        }
+
+        echo json_encode($data);
+    } else {
+        $productId = $_POST['product_id'];
+        $query = "MATCH (p:Product)<-[r]-(t:Transaction)
+                WHERE p.product_id = '$productId'
+                RETURN p.product_name AS Product, 
+                sum(r.sales) AS Total_Sales, 
+                sum(r.quantity) AS Quantity_Sold, 
+                sum(r.profit) AS Total_Profit";
+    
+        $results = $clientNeo->run($query);
+        $data = [];
+        foreach ($results as $result) {
+            $data = [
+                'Product' => $result->get('Product'),
+                'Total_Sales' => $result->get('Total_Sales'),
+                'Quantity_Sold' => $result->get('Quantity_Sold'),
+                'Total_Profit' => $result->get('Total_Profit')
+            ];
+        }
+        echo json_encode($data);
     }
-
-    $results = $clientNeo->run($query);
-
-    $data = [];
-    foreach ($results as $result) {
-        $data[] = [
-            'product_name' => $result->get('product_name'),
-            'total_quantity' => $result->get('total_quantity')
-        ];
-    }
-    echo json_encode($data);
+    
     exit;
 }
+
 ?>
 
 
@@ -117,7 +146,7 @@ if (isset($_POST['product_id'])) {
             const ctx = document.getElementById('chart1').getContext('2d');
             let myChart;
             const element = $("#selectProduct").get(0);
-            console.log(element);
+            // console.log(element);
             const choices = new Choices(element, {
                 searchEnabled: true,
                 itemSelectText: '',
@@ -234,6 +263,28 @@ if (isset($_POST['product_id'])) {
                             Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                         }
                     });
+                    $.ajax({
+                        type: 'POST',
+                        data: {
+                            product_id: productId,
+                            analysis_type: 'sales'
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            setTimeout(() => {
+                                $("#profit").text(data.Total_Sales);
+                                $("#quantity").text(data.Quantity_Sold);
+                                $("#sales").text(data.Total_Profit);
+                                Swal.close();
+                            }, 2000);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Error fetching data: ' + textStatus, errorThrown);
+                            console.log(jqXHR.responseText);
+                            Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
+                        }
+                        
+                    })
                 }
             });
 
