@@ -1,7 +1,6 @@
 <?php
 require_once "connect.php";
 
-$client = new MongoDB\Client("mongodb://localhost:27017");
 $bridged_collections = $client->supermarket->transactions_bridge_products;
 $transactions_collection = $client->supermarket->transactions;
 $products_collection = $client->supermarket->products;
@@ -43,11 +42,12 @@ if (isset($_POST['getDataButton'])) {
                 'category' => '$product.category',
                 'sub_category' => '$product.sub_category'
             ],
-            'totalSales' => ['$sum' => '$quantity'],
+            'totalQuantity' => ['$sum' => '$quantity'],
+            'totalSales' => ['$sum' => '$sales'],
             'month' => ['$first' => '$month'],
             'year' => ['$first' => '$year']
         ]],
-        ['$sort' => ['totalSales' => -1]],
+        ['$sort' => ['totalQuantity' => -1]],
         ['$limit' => 5]
     ];
 
@@ -62,6 +62,7 @@ if (isset($_POST['getDataButton'])) {
                 'name' => $result->_id->name,
                 'category' => $result->_id->category,
                 'sub_category' => $result->_id->sub_category,
+                'totalQuantity' => $result->totalQuantity,
                 'totalSales' => $result->totalSales,
                 'month' => $result->month,
                 'year' => $result->year

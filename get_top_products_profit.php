@@ -1,7 +1,6 @@
 <?php
 require_once "connect.php";
 
-$client = new MongoDB\Client("mongodb://localhost:27017");
 $bridged_collections = $client->supermarket->transactions_bridge_products;
 $transactions_collection = $client->supermarket->transactions;
 $products_collection = $client->supermarket->products;

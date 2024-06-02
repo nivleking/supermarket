@@ -29,6 +29,9 @@
 
     <!-- Tailwind Flowbite -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+
+    <!-- Plotly JS -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 </body>
 
 </html>
