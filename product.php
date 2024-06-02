@@ -78,6 +78,23 @@ if (isset($_POST['product_id'])) {
 
 
             </div>
+            <div class="grid grid-cols-1 mt-4 md:grid-cols-3 gap-4">
+
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center justify-center items-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="profit">-</div>
+                    <div class="text-center text-gray-500">Product's Profit</div>
+                </div>
+
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-cente justify-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="quantity">-</div>
+                    <div class="text-center text-gray-500">Quantity Sold</div>
+                </div>
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center justify-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="sales">-</div>
+                    <div class="text-center text-gray-500">Product's Sales</div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 mt-4 md:grid-cols-2 gap-4">
 
                 <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
