@@ -4,7 +4,6 @@
 
 require_once "connect.php";
 
-$client = new MongoDB\Client("mongodb://localhost:27017");
 $bridged_collections = $client->supermarket->transactions_bridge_products;
 $transactions_collection = $client->supermarket->transactions;
 $products_collection = $client->supermarket->products;
@@ -83,9 +82,15 @@ $products_collection = $client->supermarket->products;
                 </button>
             </div>
 
-            <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
-                <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Products Sold based On Category and Sub-Category</h1>
-                <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
+            <div class="chart-container grid grid-cols-2 gap-4">
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
+                    <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Products Sold based On Category and Sub-Category</h1>
+                    <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
+                </div>
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
+                    <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Product's Statistics based on Category and Sub-Category</h1>
+                    <canvas id="chart2" class="mb-16 ml-4 mr-8"></canvas>
+                </div>
             </div>
         </main>
     </div>
@@ -107,7 +112,7 @@ $products_collection = $client->supermarket->products;
                         labels: data.map(item => item.name),
                         datasets: [{
                             label: 'Total Products Sold',
-                            data: data.map(item => item.totalSales),
+                            data: data.map(item => item.totalQuantity),
                             backgroundColor: '#19376D',
                             borderColor: '#19376D',
                             borderWidth: 1
@@ -141,7 +146,7 @@ $products_collection = $client->supermarket->products;
                                         return data[tooltipItems[0].dataIndex].name;
                                     },
                                     label: function(tooltipItem) {
-                                        return 'Total Sales: ' + tooltipItem.raw;
+                                        return 'Total Quantity Sold: ' + tooltipItem.raw;
                                     }
                                 }
                             }
@@ -191,15 +196,6 @@ $products_collection = $client->supermarket->products;
                 month = monthMapping[month];
                 console.log(category, sub_category, month, year);
 
-                Swal.fire({
-                    title: 'Loading...',
-                    text: 'Please wait while we fetch the data',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
                 $.ajax({
                     url: 'get_top_products_sold.php',
                     type: 'POST',
@@ -214,6 +210,100 @@ $products_collection = $client->supermarket->products;
                         var parsedData = JSON.parse(data);
                         console.log(parsedData);
                         updateChart('chart1', parsedData);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            function transformData(data) {
+                let transformedData = [];
+                let categories = [...new Set(data.map(item => item.category))];
+
+                categories.forEach(category => {
+                    let categoryData = {
+                        label: category,
+                        parent: "US Superstore",
+                        children: []
+                    };
+
+                    let subCategories = data.filter(item => item.category === category);
+
+                    subCategories.forEach(subCategory => {
+                        categoryData.children.push({
+                            label: subCategory.sub_category,
+                            parent: category,
+                            value: subCategory.totalSales
+                        });
+                    });
+
+                    transformedData.push(categoryData);
+                });
+
+                let root = {
+                    label: "US Superstore",
+                    parent: "",
+                    children: transformedData
+                };
+
+                return root;
+            }
+
+            function updateChartSunburst(chartId, data) {
+                var data2 = [{
+                    type: "sunburst",
+                    labels: data.children.flatMap(item => [item.label, ...item.children.map(child => child.label)]),
+                    parents: data.children.flatMap(item => [item.parent, ...item.children.map(child => child.parent)]),
+                    values: data.children.flatMap(item => [null, ...item.children.map(child => child.value)]),
+                    outsidetextfont: {
+                        size: 20,
+                        color: "#377eb8"
+                    },
+                    leaf: {
+                        opacity: 0.8
+                    },
+                    marker: {
+                        line: {
+                            width: 2
+                        }
+                    },
+                }];
+
+                var layout = {
+                    margin: {
+                        l: 0,
+                        r: 0,
+                        b: 0,
+                        t: 0
+                    },
+                    sunburstcolorway: ["#636efa", "#ef553b", "#00cc96"],
+                };
+
+                Plotly.newPlot(chartId, data2, layout);
+            }
+
+            $("#getDataButton").click(function() {
+                Swal.fire({
+                    title: 'Loading...',
+                    text: 'Please wait while we fetch the data',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: 'get_products_based.php',
+                    type: 'POST',
+                    data: {
+                        getDataButton: true
+                    },
+                    success: function(data) {
+                        var parsedData = JSON.parse(data);
+                        var transformedData = transformData(parsedData);
+                        console.log(transformedData);
+                        updateChartSunburst('chart2', transformedData.children);
                         Swal.close();
                     },
                     error: function(error) {
@@ -222,6 +312,7 @@ $products_collection = $client->supermarket->products;
                     }
                 });
             });
+
         })
     </script>
 </body>
