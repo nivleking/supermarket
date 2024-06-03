@@ -1,11 +1,12 @@
-<?php 
+<?php
 require_once "connect.php";
 
 
 $transaksi = $client->supermarket->transactions;
 $ship_modes = $transaksi->distinct("ship_mode");
 
-function getTotalTransactions($shipMode, $transaksi) {
+function getTotalTransactions($shipMode, $transaksi)
+{
     if ($shipMode == "all") {
         $count = $transaksi->countDocuments();
     } else {
@@ -92,7 +93,7 @@ if (isset($_POST['ship_mode'])) {
     } catch (Exception $e) {
         echo json_encode(['error' => $e->getMessage()]);
     }
-    exit;    
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -102,12 +103,7 @@ if (isset($_POST['ship_mode'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
-    <!-- CDN for jquery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <?php include 'components/headers.php'; ?>
 </head>
 
 <body class="bg-gray-100">
@@ -127,7 +123,7 @@ if (isset($_POST['ship_mode'])) {
                 <select id="ship_mode" aria-label="Select Ship Mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
                     <option value="" disabled selected>Select Ship Mode</option>
                     <option value="all">All Ship Mode</option>
-                    <?php foreach($ship_modes as $mode): ?>
+                    <?php foreach ($ship_modes as $mode) : ?>
                         <option value="<?= $mode ?>"><?= $mode ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -152,7 +148,7 @@ if (isset($_POST['ship_mode'])) {
                 <div class="bg-white shadow-md rounded-lg p-6 flex flex-col justify-center items-center md:col-span-2" style="height: 36rem;">
                     <canvas id="barChart"></canvas>
                 </div>
-                
+
                 <div class="flex flex-col gap-6">
                     <div class="bg-white shadow-md rounded-lg p-6 h-44 flex flex-col justify-center items-center">
                         <div class="text-4xl font-bold text-center text-gray-800" id="total">-</div>
@@ -173,13 +169,10 @@ if (isset($_POST['ship_mode'])) {
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             var ctx = $('#barChart').get(0).getContext('2d');
-            var myChart; 
+            var myChart;
 
             function updateChart(data) {
                 if (myChart) {
@@ -197,8 +190,8 @@ if (isset($_POST['ship_mode'])) {
                                 'rgba(153, 102, 255, 0.2)'
                             ],
                             borderColor: [
-                                'rgba(75, 192, 192, 1)', 
-                                'rgba(153, 102, 255, 1)' 
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)'
                             ],
                             borderWidth: 1
                         }]
@@ -230,7 +223,7 @@ if (isset($_POST['ship_mode'])) {
                 });
             }
 
-            $('#ship_mode').change(function(){
+            $('#ship_mode').change(function() {
                 var selectedMode = $(this).val();
                 Swal.fire({
                     title: 'Loading...',
@@ -244,7 +237,9 @@ if (isset($_POST['ship_mode'])) {
                 });
                 $.ajax({
                     type: 'POST',
-                    data: {ship_mode: selectedMode},
+                    data: {
+                        ship_mode: selectedMode
+                    },
                     success: function(response) {
                         var data = JSON.parse(response);
                         console.log(data);
@@ -252,10 +247,10 @@ if (isset($_POST['ship_mode'])) {
                             $("#labelTotal").text("Total " + (selectedMode === 'all' ? 'All Ship Modes' : selectedMode));
                             $("#total").text(data.total);
                             $('#maxResponseTime').text(data.max_diff_days);
-                            $('#avgResponseTime').text(parseFloat(data.avg_diff_days).toFixed(2)); 
+                            $('#avgResponseTime').text(parseFloat(data.avg_diff_days).toFixed(2));
                             $('#minResponseTime').text(data.min_diff_days);
                             $('#countMax').text(data.countMax);
-                            $('#countMin').text(data.countMin); 
+                            $('#countMin').text(data.countMin);
                             updateChart(data);
                             Swal.close();
                         }, 1500);

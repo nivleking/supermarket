@@ -1,41 +1,70 @@
-<?php 
+<?php
 require_once "connect.php";
+
+// Load initial product list for dropdown
 $query = "MATCH (p:Product) RETURN p ORDER BY p.product_name";
 $results = $clientNeo->run($query, [], 'default', 'Proyek');
 
-if (isset($_POST['product_id'])) {
+if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
     $productId = $_POST['product_id'];
-    $analysisType = $_POST['analysis_type'] ?? 'quantity_sold';
+    $analysisType = $_POST['analysis_type'];
+    if (in_array($analysisType, ['quantity_sold', 'market_basket'])) {
+        switch ($analysisType) {
+            case 'quantity_sold':
+                $query = "MATCH (p:Product {product_id: '$productId'})<-[:BUY]-(t:Transaction)
+                        MATCH (t)-[r:BUY]->(p2:Product)
+                        WHERE p2.product_id <> '$productId'
+                        RETURN p2.product_name AS product_name, SUM(r.quantity) AS total_quantity
+                        ORDER BY total_quantity DESC
+                        LIMIT 5;";
+                break;
 
-    if ($analysisType == 'quantity_sold') {
-        $query = "MATCH (p:Product {product_id: '$productId'})<-[:BUY]-(t:Transaction)
-                MATCH (t)-[r:BUY]->(p2:Product)
-                WHERE p2.product_id <> '$productId'
-                RETURN p2.product_name AS product_name, SUM(r.quantity) AS total_quantity
-                ORDER BY total_quantity DESC
-                LIMIT 5;";
-    } else if ($analysisType == 'market_basket') {
-        $query = "MATCH (p:Product {product_id: '$productId'})
-                MATCH (t:Transaction)-[:BUY]->(p)
-                MATCH (t)-[:BUY]->(p2:Product)
-                WHERE p2.product_id <> '$productId'
-                RETURN p2.product_name AS product_name, COUNT(*) AS total_quantity
-                ORDER BY total_quantity DESC
-                LIMIT 5;";
+            case 'market_basket':
+                $query = "MATCH (p:Product {product_id: '$productId'})
+                        MATCH (t:Transaction)-[:BUY]->(p)
+                        MATCH (t)-[:BUY]->(p2:Product)
+                        WHERE p2.product_id <> '$productId'
+                        RETURN p2.product_name AS product_name, COUNT(*) AS total_quantity
+                        ORDER BY total_quantity DESC
+                        LIMIT 5;";
+                break;
+        }
+
+        $results = $clientNeo->run($query);
+        $data = [];
+        foreach ($results as $result) {
+            $data[] = [
+                'product_name' => $result->get('product_name', 'N/A'),
+                'total_quantity' => $result->get('total_quantity', 0)
+            ];
+        }
+
+        echo json_encode($data);
+    } else {
+        $productId = $_POST['product_id'];
+        $query = "MATCH (p:Product)<-[r]-(t:Transaction)
+                WHERE p.product_id = '$productId'
+                RETURN p.product_name AS Product, 
+                sum(r.sales) AS Total_Sales, 
+                sum(r.quantity) AS Quantity_Sold, 
+                sum(r.profit) AS Total_Profit";
+    
+        $results = $clientNeo->run($query);
+        $data = [];
+        foreach ($results as $result) {
+            $data = [
+                'Product' => $result->get('Product'),
+                'Total_Sales' => $result->get('Total_Sales'),
+                'Quantity_Sold' => $result->get('Quantity_Sold'),
+                'Total_Profit' => $result->get('Total_Profit')
+            ];
+        }
+        echo json_encode($data);
     }
-
-    $results = $clientNeo->run($query);
-
-    $data = [];
-    foreach ($results as $result) {
-        $data[] = [
-            'product_name' => $result->get('product_name'),
-            'total_quantity' => $result->get('total_quantity')
-        ];
-    }
-    echo json_encode($data);
+    
     exit;
 }
+
 ?>
 
 
@@ -46,17 +75,12 @@ if (isset($_POST['product_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
-    <!-- CDN for jquery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <?php include 'components/headers.php'; ?>
     <style>
-    .choices {
-        width: 25% !important;
-    }
-</style>
+        .choices {
+            width: 25% !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100">
@@ -77,14 +101,31 @@ if (isset($_POST['product_id'])) {
                     <option value="">Choose Product...</option>
                     <?php foreach ($results as $result) {
                         $node = $result->get('p');
-                        echo "<option value='".$node->getProperty('product_id')."'>".$node->getProperty('product_name') ."</option>";
-                    }?>
+                        echo "<option value='" . $node->getProperty('product_id') . "'>" . $node->getProperty('product_name') . "</option>";
+                    } ?>
                 </select>
 
 
             </div>
+            <div class="grid grid-cols-1 mt-4 md:grid-cols-3 gap-4">
+
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center justify-center items-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="profit">-</div>
+                    <div class="text-center text-gray-500">Product's Profit</div>
+                </div>
+
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-cente justify-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="quantity">-</div>
+                    <div class="text-center text-gray-500">Quantity Sold</div>
+                </div>
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center justify-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="sales">-</div>
+                    <div class="text-center text-gray-500">Product's Sales</div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 mt-4 md:grid-cols-2 gap-4">
-                
+
                 <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
                     <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Related Product By Quantity Sold</h1>
                     <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
@@ -100,15 +141,12 @@ if (isset($_POST['product_id'])) {
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             const ctx = document.getElementById('chart1').getContext('2d');
             let myChart;
             const element = $("#selectProduct").get(0);
-            console.log(element);
+            // console.log(element);
             const choices = new Choices(element, {
                 searchEnabled: true,
                 itemSelectText: '',
@@ -134,25 +172,31 @@ if (isset($_POST['product_id'])) {
                             label: label,
                             data: data.map(item => item.total_quantity),
                             backgroundColor: '#19376D',
-                            borderColor: '#19376D', 
+                            borderColor: '#19376D',
                             borderWidth: 1
                         }]
                     },
                     options: {
-                        indexAxis: 'y', 
+                        indexAxis: 'y',
                         scales: {
                             x: {
                                 beginAtZero: true,
-                                grid: { display: false } 
+                                grid: {
+                                    display: false
+                                }
                             },
                             y: {
-                                grid: { display: false }
+                                grid: {
+                                    display: false
+                                }
                             }
                         },
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: false }, 
+                            legend: {
+                                display: false
+                            },
                             tooltip: {
                                 enabled: true,
                                 callbacks: {
@@ -185,12 +229,15 @@ if (isset($_POST['product_id'])) {
                     });
                     $.ajax({
                         type: 'POST',
-                        data: { product_id: productId, analysis_type: 'quantity_sold' },
+                        data: {
+                            product_id: productId,
+                            analysis_type: 'quantity_sold'
+                        },
                         dataType: 'json',
                         success: function(data) {
-                            setTimeout(() => { 
+                            setTimeout(() => {
                                 updateChart('chart1', data);
-                                Swal.close(); 
+                                Swal.close();
                             }, 2000);
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -200,12 +247,15 @@ if (isset($_POST['product_id'])) {
                     });
                     $.ajax({
                         type: 'POST',
-                        data: { product_id: productId, analysis_type: 'market_basket' },
+                        data: {
+                            product_id: productId,
+                            analysis_type: 'market_basket'
+                        },
                         dataType: 'json',
                         success: function(data) {
                             setTimeout(() => {
                                 updateChart('chart2', data);
-                                Swal.close(); 
+                                Swal.close();
                             }, 2000);
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -213,6 +263,28 @@ if (isset($_POST['product_id'])) {
                             Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                         }
                     });
+                    $.ajax({
+                        type: 'POST',
+                        data: {
+                            product_id: productId,
+                            analysis_type: 'sales'
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            setTimeout(() => {
+                                $("#profit").text(data.Total_Sales);
+                                $("#quantity").text(data.Quantity_Sold);
+                                $("#sales").text(data.Total_Profit);
+                                Swal.close();
+                            }, 2000);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Error fetching data: ' + textStatus, errorThrown);
+                            console.log(jqXHR.responseText);
+                            Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
+                        }
+                        
+                    })
                 }
             });
 
