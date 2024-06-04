@@ -1,12 +1,11 @@
 <?php
-require_once "connect.php";
+require_once "../connect.php";
 
-$bridged_collections = $client->supermarket->transactions_bridge_products;
-$transactions_collection = $client->supermarket->transactions;
-$products_collection = $client->supermarket->products;
+$transactions_bridge_products = $client->supermarket->transactions_bridge_products;
+
+$transactions_bridge_products->createIndex(['order_id' => 1]);
 
 if (isset($_POST['getDataButton'])) {
-
     $month = $_POST['month'];
     $year = $_POST['year'];
 
@@ -44,7 +43,7 @@ if (isset($_POST['getDataButton'])) {
     ];
 
     try {
-        $results = $bridged_collections->aggregate($pipeline);
+        $results = $transactions_bridge_products->aggregate($pipeline);
         $resultsArray = iterator_to_array($results);
 
         $response = [];
@@ -58,6 +57,7 @@ if (isset($_POST['getDataButton'])) {
 
         echo json_encode($response);
     } catch (Exception $e) {
-        echo "Error: " . $e->getMessage();
+        echo json_encode(['error' => $e->getMessage()]);
     }
 }
+?>

@@ -1,9 +1,13 @@
 <?php
-require_once "connect.php";
+require_once "../connect.php";
 
 $bridged_collections = $client->supermarket->transactions_bridge_products;
 $transactions_collection = $client->supermarket->transactions_with_customers;
 $customers_collection = $client->supermarket->customers;
+
+$bridged_collections->createIndex(['order_id' => 1]);
+$transactions_collection->createIndex(['order_id' => 1]);
+$customers_collection->createIndex(['customer_id' => 1]);
 
 if (isset($_POST['getDataButton'])) {
     $state = $_POST['state'];

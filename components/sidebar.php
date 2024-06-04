@@ -20,7 +20,7 @@
             </li>
             <li>
                 <a href="product_profit.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'product_profit.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'product_profit.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'product_profit.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor">
                         <path d="M64 64C28.7 64 0 92.7 0 128V384c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H64zm64 320H64V320c35.3 0 64 28.7 64 64zM64 192V128h64c0 35.3-28.7 64-64 64zM448 384c0-35.3 28.7-64 64-64v64H448zm64-192c-35.3 0-64-28.7-64-64h64v64zM288 160a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
                     </svg>
                     <span class="ms-3">Products' Profit</span>
@@ -28,7 +28,7 @@
             </li>
             <li>
                 <a href="unprofit.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'unprofit.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'unprofit.php') ? 'text-black' : 'text-gray-500'; ?> transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'unprofit.php') ? 'text-black' : 'text-gray-500'; ?> transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm0 3c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 18.514 2 13 6.486 3 12 3zm0 4c-.552 0-1 .448-1 1v4c0 .552.448 1 1 1s1-.448 1-1V8c0-.552-.448-1-1-1zm0 12c-1.654 0-3-1.346-3-3s1.346-3 3-3 3 1.346 3 3-1.346 3-3 3zm0-5c-.552 0-1 .448-1 1v4c0 .552.448 1 1 1s1-.448 1-1v-4c0-.552-.448-1-1-1z" />
                     </svg>
                     <span class="ms-3">Loss-Making Product</span>
@@ -53,7 +53,7 @@
             </li>
             <li>
                 <a href="state.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'state.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'state.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'state.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor">
                         <path d="M64 64C28.7 64 0 92.7 0 128V384c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H64zm64 320H64V320c35.3 0 64 28.7 64 64zM64 192V128h64c0 35.3-28.7 64-64 64zM448 384c0-35.3 28.7-64 64-64v64H448zm64-192c-35.3 0-64-28.7-64-64h64v64zM288 160a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
                     </svg>
                     <span class="ms-3">State Analysis</span>

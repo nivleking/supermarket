@@ -1,11 +1,11 @@
 <?php
-require_once "connect.php";
+require_once "../connect.php";
 
 $bridged_collections = $client->supermarket->transactions_bridge_products;
 $transactions_collection = $client->supermarket->transactions;
 $products_collection = $client->supermarket->products;
 
-if (isset($_POST['getDataButton'])) {
+if (isset($_POST['getDataButtonz'])) {
     $pipeline = [
         [
             '$lookup' => [

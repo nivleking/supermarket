@@ -1,8 +1,5 @@
 <?php
-require_once "connect.php";
-
-$bridged_collections = $client->supermarket->transactions_bridge_products;
-$transactions_collection = $client->supermarket->transactions;
+require_once "../connect.php";
 $products_collection = $client->supermarket->products;
 
 if (isset($_POST['category'])) {

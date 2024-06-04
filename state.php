@@ -1,9 +1,8 @@
 <?php
 require_once "connect.php";
-
-$bridged_collections = $client->supermarket->transactions_bridge_products;
-$transactions_collection = $client->supermarket->transactions;
 $customers_collection = $client->supermarket->customers;
+
+$states = $customers_collection->distinct('state');
 ?>
 
 <!DOCTYPE html>
@@ -35,10 +34,10 @@ $customers_collection = $client->supermarket->customers;
                 <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" style="margin-right: 12px;">
                     <option value="all_states" selected>All states</option>
                     <?php
-                    $categories = $customers_collection->distinct('state');
+                    $states = $customers_collection->distinct('state');
                     ?>
 
-                    <?php foreach ($categories as $state) {
+                    <?php foreach ($states as $state) {
                         echo "<option value='" . $state . "'>" . $state . "</option>";
                     } ?>
                 </select>
@@ -249,7 +248,7 @@ $customers_collection = $client->supermarket->customers;
                 });
 
                 $.ajax({
-                    url: 'get_state_cities.php',
+                    url: 'getters/get_state_cities.php',
                     type: 'POST',
                     data: {
                         getDataButton: true,

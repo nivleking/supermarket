@@ -1,9 +1,15 @@
 <?php
-require_once "connect.php";
+require_once "../connect.php";
 
 $bridged_collections = $client->supermarket->transactions_bridge_products;
 $transactions_collection = $client->supermarket->transactions;
 $products_collection = $client->supermarket->products;
+
+$bridged_collections->createIndex(['order_id' => 1]);
+$transactions_collection->createIndex(['order_id' => 1]);
+$products_collection->createIndex(['product_id' => 1]);
+
+$categories = $products_collection->distinct('category');
 
 if (isset($_POST['getDataButton'])) {
     $category = $_POST['category'];

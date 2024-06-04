@@ -1,12 +1,5 @@
 <?php
-// 2014 starts at march
-// 2017 ends with january only
-
 require_once "connect.php";
-
-$bridged_collections = $client->supermarket->transactions_bridge_products;
-$transactions_collection = $client->supermarket->transactions;
-$products_collection = $client->supermarket->products;
 ?>
 
 <!DOCTYPE html>
@@ -161,7 +154,7 @@ $products_collection = $client->supermarket->products;
                 });
 
                 $.ajax({
-                    url: 'get_top_products_profit.php',
+                    url: 'getters/get_products_profit.php',
                     type: 'POST',
                     data: {
                         getDataButton: true,
@@ -169,7 +162,14 @@ $products_collection = $client->supermarket->products;
                         year: year
                     },
                     success: function(data) {
-                        var parsedData = JSON.parse(data);
+                        console.log(data);
+                        try {
+                            var parsedData = JSON.parse(data);
+                        } catch (error) {
+                            console.log(error);
+                            Swal.close();
+                            return;
+                        }
                         console.log(parsedData);
                         updateChart('chart1', parsedData);
                         Swal.close();
