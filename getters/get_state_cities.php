@@ -17,6 +17,7 @@ if (isset($_POST['getDataButton'])) {
     }
 
     $pipeline = [
+        $matchStage,
         ['$lookup' => [
             'from' => 'transactions_bridge_products',
             'localField' => 'order_id',
@@ -27,7 +28,6 @@ if (isset($_POST['getDataButton'])) {
         ['$addFields' => [
             'numericSales' => ['$toDouble' => ['$replaceOne' => ['input' => ['$toString' => '$products.sales'], 'find' => ',', 'replacement' => '.']]]
         ]],
-        $matchStage,
         ['$group' => [
             '_id' => ['state' => '$state', 'city' => '$city'],
             'count' => ['$sum' => 1],

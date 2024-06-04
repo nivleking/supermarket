@@ -26,13 +26,14 @@ $states = $transactions_collection->distinct('state');
         <main class="flex-1 p-6 sm:ml-64 mt-12">
             <!-- Title Box -->
             <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start">
-                <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">State Analysis on Cities' Quantities and Sales</h1>
+                <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">State Analysis on Cities' Sales</h1>
             </div>
 
             <!-- Input Box -->
             <div class="bg-white shadow-md rounded-lg p-6 mb-8 justify-start items-start" style="display: flex; align-items: center;">
                 <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" style="margin-right: 12px;">
                     <option value="all_states" selected>All states</option>
+
                     <?php foreach ($states as $state) {
                         echo "<option value='" . $state . "'>" . $state . "</option>";
                     } ?>
@@ -48,6 +49,19 @@ $states = $transactions_collection->distinct('state');
 
     <script>
         let colorscale = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'];
+
+        let stateColors = {
+            'California': '#636EFA',
+            'Washington': '#EF553B',
+            'Texas': '#00CC96',
+            'New York': '#AB63FA',
+            'Florida': '#FFA15A',
+            'Georgia': '#19D3F3',
+            'Illinois': '#FF6692',
+            'Pennsylvania': '#B6E880',
+            'Ohio': '#FF97FF',
+            'Michigan': '#FECB52'
+        };
 
         function updateChart(chartId, data) {
             let labels = [];
@@ -65,7 +79,7 @@ $states = $transactions_collection->distinct('state');
             data.forEach(function(city) {
                 labels.push(city.city);
                 parents.push(city.state);
-                values.push(city.count);
+                values.push(city.totalSales);
                 totalQuantity.push(city.totalQuantity);
                 avgQuantity.push(city.avgQuantity);
                 maxQuantity.push(city.maxQuantity);
@@ -98,35 +112,31 @@ $states = $transactions_collection->distinct('state');
                 textinfo: "label+value",
                 customdata: customData,
                 hovertemplate: '<b>%{label}</b><br>' +
-                    'Count: %{value}<br>' +
-                    'Total Quantity: %{customdata.totalQuantity}<br>' +
-                    'Average Quantity: %{customdata.avgQuantity}<br>' +
-                    'Max Quantity: %{customdata.maxQuantity}<br>' +
-                    'Min Quantity: %{customdata.minQuantity}<br>' +
-                    'Total Sales: %{customdata.totalSales}<br>' +
-                    'Average Sales: %{customdata.avgSales}<br>' +
+                    'Total Sales: %{value}<br>' +
+                    // 'Total Quantity : %{customdata.totalQuantity}<br>' +
+                    // 'Total Sales: %{customdata.totalSales}<br>' +
+                    // 'Max Quantity: %{customdata.maxQuantity}<br>' +
                     'Max Sales: %{customdata.maxSales}<br>' +
+                    // 'Min Quantity: %{customdata.minQuantity}<br>' +
                     'Min Sales: %{customdata.minSales}<br>' +
+                    // 'Average Quantity: %{customdata.avgQuantity}<br>' +
+                    'Average Sales: %{customdata.avgSales}<br>' +
                     '<extra></extra>'
+
             }];
 
             let layout = {
                 width: 1500,
                 height: 600,
-                title: 'State Analysis on Cities\' Quantities and Sales',
+                title: 'State Analysis in ' + data[0].state,
             };
 
             Plotly.react(chartId, data2, layout);
         }
 
         function updateChartAllStates(chartId, data) {
-            if (!data) {
-                console.error('No data provided to updateChartAllStates');
-                return;
-            }
-
             let transformedData = [];
-            let labels = ['root'];
+            let labels = ['US States'];
             let parents = [''];
             let values = [0];
             let totalQuantities = [0];
@@ -143,18 +153,50 @@ $states = $transactions_collection->distinct('state');
                 if (!state) {
                     state = {
                         state: item.state,
+                        count: 0,
                         totalSales: 0,
                         totalQuantity: 0,
-                        cities: []
+                        cities: [],
+                        maxQuantity: 0,
+                        minQuantity: 0,
+                        maxSales: 0,
+                        minSales: 0,
+                        count: 0
                     };
                     transformedData.push(state);
                     labels.push(state.state);
-                    parents.push('root');
+                    parents.push('US States');
                 }
                 state.totalSales += item.totalSales;
                 state.totalQuantity += item.totalQuantity;
+                state.count += item.count;
+
                 values[labels.indexOf(state.state)] = state.totalSales;
+
                 totalQuantities[labels.indexOf(state.state)] = state.totalQuantity;
+                totalSales[labels.indexOf(state.state)] = item.totalSales;
+
+                state.maxQuantity = Math.max(state.maxQuantity, item.maxQuantity);
+                state.minQuantity = Math.min(state.minQuantity, item.minQuantity);
+
+                maxQuantities[labels.indexOf(state.state)] = state.maxQuantity;
+
+                if (state.minQuantity == 0) {
+                    state.minQuantity = item.minQuantity;
+                }
+                minQuantities[labels.indexOf(state.state)] = state.minQuantity;
+
+                state.maxSales = Math.max(state.maxSales, item.maxSales);
+
+                if (state.minSales == 0) {
+                    state.minSales = item.minSales;
+                }
+                state.minSales = Math.min(state.minSales, item.minSales);
+
+                maxSales[labels.indexOf(state.state)] = state.maxSales;
+                minSales[labels.indexOf(state.state)] = state.minSales;
+
+                avgSales[labels.indexOf(state.state)] = item.avgSales;
 
                 let city = state.cities.find(city => city.city === item.city);
                 if (!city) {
@@ -167,7 +209,8 @@ $states = $transactions_collection->distinct('state');
                         minQuantity: 0,
                         avgSales: 0,
                         maxSales: 0,
-                        minSales: 0
+                        minSales: 0,
+                        count: 0
                     };
                     state.cities.push(city);
                     labels.push(city.city);
@@ -175,12 +218,16 @@ $states = $transactions_collection->distinct('state');
                 }
                 city.sales += item.totalSales;
                 city.quantity += item.totalQuantity;
+                city.count += item.count;
+
                 values[labels.indexOf(city.city)] = city.sales;
                 totalQuantities[labels.indexOf(city.city)] = city.quantity;
+                totalSales[labels.indexOf(city.city)] = item.totalSales;
+
                 avgQuantities[labels.indexOf(city.city)] = item.avgQuantity;
                 maxQuantities[labels.indexOf(city.city)] = item.maxQuantity;
                 minQuantities[labels.indexOf(city.city)] = item.minQuantity;
-                totalSales[labels.indexOf(city.city)] = item.totalSales;
+
                 avgSales[labels.indexOf(city.city)] = item.avgSales;
                 maxSales[labels.indexOf(city.city)] = item.maxSales;
                 minSales[labels.indexOf(city.city)] = item.minSales;
@@ -202,27 +249,28 @@ $states = $transactions_collection->distinct('state');
                 labels: labels,
                 parents: parents,
                 marker: {
-                    colors: colorscale
+                    colors: parents.map(parent => stateColors[parent])
                 },
                 values: values,
                 textinfo: "label+text+value",
                 customdata: customData,
                 hovertemplate: '<b>%{label}</b><br>' +
                     'Total Sales: %{value}<br>' +
-                    'Total Quantity: %{customdata.totalQuantity}<br>' +
-                    'Average Quantity: %{customdata.avgQuantity}<br>' +
-                    'Max Quantity: %{customdata.maxQuantity}<br>' +
-                    'Min Quantity: %{customdata.minQuantity}<br>' +
-                    'Average Sales: %{customdata.avgSales}<br>' +
+                    // 'Total Quantity: %{customdata.totalQuantity}<br>' +
+                    // 'Total Sales: %{customdata.totalSales}<br>' +
+                    // 'Max Quantity: %{customdata.maxQuantity}<br>' +
                     'Max Sales: %{customdata.maxSales}<br>' +
+                    // 'Min Quantity: %{customdata.minQuantity}<br>' +
                     'Min Sales: %{customdata.minSales}<br>' +
+                    // 'Average Quantity: %{customdata.avgQuantity}<br>' +
+                    'Average Sales: %{customdata.avgSales}<br>' +
                     '<extra></extra>'
             }];
 
             let layout = {
                 width: 1500,
                 height: 600,
-                title: 'All states Analysis on Cities\' Sales and Quantities',
+                title: 'US States Analysis on its Cities\' Sales',
             };
 
             Plotly.react(chartId, data2, layout);
