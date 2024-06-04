@@ -1,194 +1,93 @@
 <?php
 require_once "connect.php";
 
-
 $transaksi = $client->supermarket->transactions;
+
 // Select Region
 $regions = $transaksi->distinct("region");
 
-// Select Years
-$yearPipeline = [
-    [
-        '$project' => [
-            'year' => ['$year' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']]]
-        ]
-    ],
-    [
-        '$group' => [
-            '_id' => '$year'
-        ]
-    ],
-    [
-        '$sort' => [
-            '_id' => 1
-        ]
-    ]
-];
-$result = $transaksi->aggregate($yearPipeline);
-
-$years = [];
-foreach ($result as $document) {
-    $years[] = $document['_id'];
-}
-
 if (isset($_POST['regions'])) {
-    $filter = [];
+    $pipelineBase = [
+        [
+            '$lookup' => [
+                'from' => 'transactions_bridge_products',
+                'localField' => 'order_id',
+                'foreignField' => 'order_id',
+                'as' => 'details'
+            ]
+        ],
+        ['$unwind' => '$details'],
+        [
+            '$project' => [
+                'order_date' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']],
+                'sales' => '$details.sales',
+                'profit' => '$details.profit'
+            ]
+        ],
+        [
+            '$group' => [
+                '_id' => ['$year' => '$order_date'],
+                'total_sales' => ['$sum' => '$sales'],
+                'total_profit' => ['$sum' => '$profit']
+            ]
+        ],
+        [
+            '$group' => [
+                '_id' => null,
+                'years' => [
+                    '$push' => [
+                        'year' => '$_id',
+                        'total_sales' => '$total_sales',
+                        'total_profit' => '$total_profit'
+                    ]
+                ],
+                'max_sales' => ['$max' => '$total_sales'],
+                'min_sales' => ['$min' => '$total_sales'],
+                'avg_sales' => ['$avg' => '$total_sales'],
+                'max_profit' => ['$max' => '$total_profit'],
+                'min_profit' => ['$min' => '$total_profit'],
+                'avg_profit' => ['$avg' => '$total_profit']
+            ]
+        ],
+        [
+            '$project' => [
+                'years' => 1,
+                'max_sales' => 1,
+                'min_sales' => 1,
+                'avg_sales' => 1,
+                'max_profit' => 1,
+                'min_profit' => 1,
+                'avg_profit' => 1,
+                'total_sales' => ['$sum' => '$years.total_sales'],
+                'total_profit' => ['$sum' => '$years.total_profit']
+            ]
+        ]
+    ];
 
     if ($_POST['regions'] == 'ar') {
-        $pipeline = [
-            [
-                '$lookup' => [
-                    'from' => 'transactions_bridge_products',
-                    'localField' => 'order_id',
-                    'foreignField' => 'order_id',
-                    'as' => 'details'
-                ]
-            ],
-            ['$unwind' => '$details'],
-            [
-                '$project' => [
-                    'order_date' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']],
-                    'sales' => '$details.sales',
-                    'profit' => '$details.profit'
-                ]
-            ],
-            [
-                '$group' => [
-                    '_id' => ['$year' => '$order_date'],
-                    'total_sales' => ['$sum' => '$sales'],
-                    'total_profit' => ['$sum' => '$profit']
-                ]
-            ],
-            [
-                '$group' => [
-                    '_id' => null,
-                    'years' => [
-                        '$push' => [
-                            'year' => '$_id',
-                            'total_sales' => '$total_sales',
-                            'total_profit' => '$total_profit'
-                        ]
-                    ],
-                    'max_sales' => ['$max' => '$total_sales'],
-                    'min_sales' => ['$min' => '$total_sales'],
-                    'avg_sales' => ['$avg' => '$total_sales'],
-                    'max_profit' => ['$max' => '$total_profit'],
-                    'min_profit' => ['$min' => '$total_profit'],
-                    'avg_profit' => ['$avg' => '$total_profit']
-                ]
-            ],
-            [
-                '$project' => [
-                    'years' => 1,
-                    'max_sales' => 1,
-                    'min_sales' => 1,
-                    'avg_sales' => 1,
-                    'max_profit' => 1,
-                    'min_profit' => 1,
-                    'avg_profit' => 1,
-                    'total_sales' => ['$sum' => '$years.total_sales'],
-                    'total_profit' => ['$sum' => '$years.total_profit']
-                ]
-            ]
-        ];
-        $result = $transaksi->aggregate($pipeline)->toArray();
-        $response = [
-            'avg_sales' => $result[0]->avg_sales ?? 0,
-            'avg_profit' => $result[0]->avg_profit ?? 0,
-            'max_sales' => $result[0]->max_sales ?? 0,
-            'max_profit' => $result[0]->max_profit ?? 0,
-            'min_sales' => $result[0]->min_sales ?? 0,
-            'min_profit' => $result[0]->min_profit ?? 0,
-            'total_sales' => $result[0]->total_sales ?? 0,
-            'total_profit' => $result[0]->total_profit ?? 0,
-            'years' => $result[0]->years ?? [],
-        ];
-
-        echo json_encode($response);
-        exit();
+        $pipeline = $pipelineBase;
     } else {
-        $filter['region'] = $_POST['regions'];
-        $pipeline = [
-            [
-                '$lookup' => [
-                    'from' => 'transactions_bridge_products',
-                    'localField' => 'order_id',
-                    'foreignField' => 'order_id',
-                    'as' => 'details'
-                ]
-            ],
-            [
-                '$unwind' => '$details'
-            ],
-            [
-                '$project' => [
-                    'region' => 1,
-                    'order_date' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']],
-                    'sales' => '$details.sales',
-                    'profit' => '$details.profit'
-                ]
-            ],
-            [
-                '$match' => $filter
-            ],
-            [
-                '$group' => [
-                    '_id' => ['$year' => '$order_date'],
-                    'total_sales' => ['$sum' => '$sales'],
-                    'total_profit' => ['$sum' => '$profit']
-                ]
-            ],
-            [
-                '$group' => [
-                    '_id' => null,
-                    'years' => [
-                        '$push' => [
-                            'year' => '$_id',
-                            'total_sales' => '$total_sales',
-                            'total_profit' => '$total_profit'
-                        ]
-                    ],
-                    'max_sales' => ['$max' => '$total_sales'],
-                    'min_sales' => ['$min' => '$total_sales'],
-                    'avg_sales' => ['$avg' => '$total_sales'],
-                    'max_profit' => ['$max' => '$total_profit'],
-                    'min_profit' => ['$min' => '$total_profit'],
-                    'avg_profit' => ['$avg' => '$total_profit']
-                ]
-            ],
-            [
-                '$project' => [
-                    'years' => 1,
-                    'max_sales' => 1,
-                    'min_sales' => 1,
-                    'avg_sales' => 1,
-                    'max_profit' => 1,
-                    'min_profit' => 1,
-                    'avg_profit' => 1,
-                    'total_sales' => ['$sum' => '$years.total_sales'],
-                    'total_profit' => ['$sum' => '$years.total_profit']
-                ]
-            ]
-        ];
-
-        $result = $transaksi->aggregate($pipeline)->toArray();
-        $response = [
-            'avg_sales' => $result[0]->avg_sales ?? 0,
-            'avg_profit' => $result[0]->avg_profit ?? 0,
-            'max_sales' => $result[0]->max_sales ?? 0,
-            'max_profit' => $result[0]->max_profit ?? 0,
-            'min_sales' => $result[0]->min_sales ?? 0,
-            'min_profit' => $result[0]->min_profit ?? 0,
-            'total_sales' => $result[0]->total_sales ?? 0,
-            'total_profit' => $result[0]->total_profit ?? 0,
-            'years' => $result[0]->years ?? [],
-        ];
-
-        echo json_encode($response);
-        exit();
+        $filter = ['region' => $_POST['regions']];
+        $matchStage = ['$match' => $filter];
+        $pipeline = array_merge([$matchStage], $pipelineBase);
     }
-}
 
+    $result = $transaksi->aggregate($pipeline)->toArray();
+    $response = [
+        'avg_sales' => $result[0]->avg_sales ?? 0,
+        'avg_profit' => $result[0]->avg_profit ?? 0,
+        'max_sales' => $result[0]->max_sales ?? 0,
+        'max_profit' => $result[0]->max_profit ?? 0,
+        'min_sales' => $result[0]->min_sales ?? 0,
+        'min_profit' => $result[0]->min_profit ?? 0,
+        'total_sales' => $result[0]->total_sales ?? 0,
+        'total_profit' => $result[0]->total_profit ?? 0,
+        'years' => $result[0]->years ?? [],
+    ];
+
+    echo json_encode($response);
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

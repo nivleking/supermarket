@@ -27,6 +27,15 @@
                 </a>
             </li>
             <li>
+                <a href="unprofit.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'unprofit.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'unprofit.php') ? 'text-black' : 'text-gray-500'; ?> transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm0 3c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 18.514 2 13 6.486 3 12 3zm0 4c-.552 0-1 .448-1 1v4c0 .552.448 1 1 1s1-.448 1-1V8c0-.552-.448-1-1-1zm0 12c-1.654 0-3-1.346-3-3s1.346-3 3-3 3 1.346 3 3-1.346 3-3 3zm0-5c-.552 0-1 .448-1 1v4c0 .552.448 1 1 1s1-.448 1-1v-4c0-.552-.448-1-1-1z" />
+                    </svg>
+                    <span class="ms-3">Loss-Making Product</span>
+                </a>
+            </li>
+
+            <li>
                 <a href="order.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'order.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                     <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'order.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                         <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
@@ -50,6 +59,15 @@
                     <span class="ms-3">State Analysis</span>
                 </a>
             </li>
+            <li>
+                <a href="region.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'region.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'region.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z" />
+                    </svg>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Region Sales & Profit</span>
+                </a>
+            </li>
+
         </ul>
     </div>
 </aside>
