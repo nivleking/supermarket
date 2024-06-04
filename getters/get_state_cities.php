@@ -2,12 +2,10 @@
 require_once "../connect.php";
 
 $bridged_collections = $client->supermarket->transactions_bridge_products;
-$transactions_collection = $client->supermarket->transactions_with_customers;
-$customers_collection = $client->supermarket->customers;
+$transactions_collection = $client->supermarket->transactions;
 
 $bridged_collections->createIndex(['order_id' => 1]);
 $transactions_collection->createIndex(['order_id' => 1]);
-$customers_collection->createIndex(['customer_id' => 1]);
 
 if (isset($_POST['getDataButton'])) {
     $state = $_POST['state'];
@@ -26,20 +24,12 @@ if (isset($_POST['getDataButton'])) {
             'as' => 'products'
         ]],
         ['$unwind' => '$products'],
-        ['$lookup' => [
-            'from' => 'customers',
-            'localField' => 'customer_id',
-            'foreignField' => 'customer_id',
-            'as' => 'customer'
-        ]],
-        ['$unwind' => '$customer'],
         ['$addFields' => [
-            'numericSales' => ['$toDouble' => ['$replaceOne' => ['input' => ['$toString' => '$products.sales'], 'find' => ',', 'replacement' => '.']]],
-            'state' => '$customer.state',
+            'numericSales' => ['$toDouble' => ['$replaceOne' => ['input' => ['$toString' => '$products.sales'], 'find' => ',', 'replacement' => '.']]]
         ]],
         $matchStage,
         ['$group' => [
-            '_id' => ['state' => '$customer.state', 'city' => '$customer.city'],
+            '_id' => ['state' => '$state', 'city' => '$city'],
             'count' => ['$sum' => 1],
             'totalQuantity' => ['$sum' => '$products.quantity'],
             'avgQuantity' => ['$avg' => '$products.quantity'],

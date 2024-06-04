@@ -1,8 +1,8 @@
 <?php
 require_once "connect.php";
-$customers_collection = $client->supermarket->customers;
+$transactions_collection = $client->supermarket->transactions;
 
-$states = $customers_collection->distinct('state');
+$states = $transactions_collection->distinct('state');
 ?>
 
 <!DOCTYPE html>
@@ -33,10 +33,6 @@ $states = $customers_collection->distinct('state');
             <div class="bg-white shadow-md rounded-lg p-6 mb-8 justify-start items-start" style="display: flex; align-items: center;">
                 <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" style="margin-right: 12px;">
                     <option value="all_states" selected>All states</option>
-                    <?php
-                    $states = $customers_collection->distinct('state');
-                    ?>
-
                     <?php foreach ($states as $state) {
                         echo "<option value='" . $state . "'>" . $state . "</option>";
                     } ?>
