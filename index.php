@@ -1,18 +1,6 @@
 <?php
 include 'connect.php';
 
-// $headers = [];
-// $data = [];
-// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//     if (is_uploaded_file($_FILES['fileToUpload']['tmp_name'])) {
-//         $file = fopen($_FILES['fileToUpload']['tmp_name'], 'r');
-//         $headers = fgetcsv($file);
-//         while (($row = fgetcsv($file)) !== false) {
-//             $data[] = $row;
-//         }
-//         fclose($file);
-//     }
-// }
 ?>
 
 <!DOCTYPE html>
@@ -31,84 +19,23 @@ include 'connect.php';
     include 'components/sidebar.php';
     ?>
 
+    <div class="flex">
+        <?php include 'components/sidebar.php'; ?>
 
-    <div class="p-4 sm:ml-64 flex">
-        <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14 flex-1">
-            <canvas id="barChart"></canvas>
-        </div>
+        <main class="flex-1 p-6 sm:ml-64 mt-12">
+            <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start">
+                <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">Welcome to Supermarket Analysis</h1>
+            </div>
 
-        <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14 flex-2">
-            <canvas id="pieChart"></canvas>
-        </div>
+            <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start">
+                <p>Navigate to the sidebar menus to check our analysis on supermarket's data.</p>
+            </div>
+
+        </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        const barCtx = document.getElementById('barChart');
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
 
-        const pieCtx = document.getElementById('pieChart');
-        new Chart(pieCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-        });
     </script>
 </body>
 

@@ -93,13 +93,7 @@ if (isset($_POST['regions'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
-    <!-- CDN for jquery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <?php include 'components/headers.php'; ?>
 </head>
 
 <body class="bg-gray-100">
@@ -145,9 +139,6 @@ if (isset($_POST['regions'])) {
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script>
         $(document).ready(function() {
             var ctx = $('#barChart').get(0).getContext('2d');
@@ -206,7 +197,7 @@ if (isset($_POST['regions'])) {
                     }
                 });
             }
-            
+
             function loadProducts() {
                 var selectedRegion = $('#regions').val();
                 console.log(selectedRegion);
