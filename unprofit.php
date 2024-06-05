@@ -2,11 +2,38 @@
 require_once "connect.php";
 
 $transaksi = $client->supermarket->transactions;
+
 // Select Region
 $regions = $transaksi->distinct("region");
 
-if (isset($_POST['regions'])) {
+// Select Years
+$yearPipeline = [
+    [
+        '$project' => [
+            'year' => ['$year' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']]]
+        ]
+    ],
+    [
+        '$group' => [
+            '_id' => '$year'
+        ]
+    ],
+    [
+        '$sort' => [
+            '_id' => 1
+        ]
+    ]
+];
+$result = $transaksi->aggregate($yearPipeline);
+
+$years = [];
+foreach ($result as $document) {
+    $years[] = $document['_id'];
+}
+
+if (isset($_POST['regions']) || isset($_POST['years'])) {
     $selectedRegion = $_POST['regions'];
+    $selectedYear = $_POST['years'];
     $pipeline = [
         [
             '$lookup' => [
@@ -32,11 +59,25 @@ if (isset($_POST['regions'])) {
         ]
     ];
 
-    // Tambahkan filter region jika bukan 'ar'
+    // Add filter for region if selectedRegion is not 'ar'
     if ($selectedRegion !== 'ar') {
         $pipeline[] = [
             '$match' => [
                 'region' => $selectedRegion
+            ]
+        ];
+    }
+
+    // Add filter for year if selectedYear is not 'ay'
+    if ($selectedYear !== 'ay') {
+        $pipeline[] = [
+            '$addFields' => [
+                'year' => ['$year' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']]]
+            ]
+        ];
+        $pipeline[] = [
+            '$match' => [
+                'year' => (int)$selectedYear
             ]
         ];
     }
@@ -60,7 +101,7 @@ if (isset($_POST['regions'])) {
             '$sort' => ['totalLoss' => 1]
         ],
         [
-            '$limit' => 5
+            '$limit' => 10
         ],
         [
             '$project' => [
@@ -76,8 +117,8 @@ if (isset($_POST['regions'])) {
 
     foreach ($result as $item) {
         $response[] = [
-            'product_name' => $item->product_name ?? '',
-            'totalLoss' => $item->totalLoss ?? 0
+            'product_name' => $item['product_name'] ?? '',
+            'totalLoss' => $item['totalLoss'] ?? 0
         ];
     }
 
@@ -117,22 +158,19 @@ if (isset($_POST['regions'])) {
                             <option value="<?= $region ?>"><?= $region ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <select id="years" aria-label="Select Years" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-4 mt-4 md:mt-0">
+                        <option value="" disabled selected>Select Year</option>
+                        <option value="ay">All Years</option>
+                        <?php foreach ($years as $year) : ?>
+                            <option value="<?= $year ?>"><?= $year ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 mt-8 md:grid-cols-3 gap-6">
-                <div class="bg-white shadow-md rounded-lg p-6 flex flex-col justify-center items-center md:col-span-2" style="height: 100%;">
-                    <canvas id="barChart"></canvas>
-                </div>
-
-                <div class="flex flex-col gap-6">
-                    <!-- Min Sales and Min Profit side by side -->
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
-                        <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
-                            <div class="text-center text-gray-500">List of Product</div>
-                            <div class="text-4xl font-bold text-center text-gray-800" id="minProfit">-</div>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-1 mt-8 md:grid-cols-1 gap-6">
+                <div class="bg-white shadow-md rounded-lg p-6 flex flex-col justify-center items-center md:col-span-3" style="height: 100%;">
+                    <canvas id="barChart" width="800" height="400"></canvas>
                 </div>
             </div>
 
@@ -200,23 +238,27 @@ if (isset($_POST['regions'])) {
 
             function loadProducts() {
                 var selectedRegion = $('#regions').val();
-                console.log(selectedRegion);
+                var selectedYears = $('#years').val();
+                console.log(selectedRegion, selectedYears);
 
                 $.ajax({
                     type: 'POST',
                     url: 'unprofit.php',
                     data: {
-                        regions: selectedRegion
+                        regions: selectedRegion,
+                        years: selectedYears
                     },
                     success: function(response) {
                         var data = JSON.parse(response);
                         console.log(data);
                         updateChart(data);
                     }
-                })
+                });
             }
 
             $("#regions").on('change', loadProducts);
+            $("#years").on('change', loadProducts);
+
         });
     </script>
 </body>
