@@ -31,6 +31,7 @@ if (isset($_POST['regions'])) {
                 'total_profit' => ['$sum' => '$profit']
             ]
         ],
+        ['$sort' => ['_id' => 1]], // Menambahkan langkah sort di sini
         [
             '$group' => [
                 '_id' => null,
@@ -63,6 +64,7 @@ if (isset($_POST['regions'])) {
             ]
         ]
     ];
+    
 
     if ($_POST['regions'] == 'ar') {
         $pipeline = $pipelineBase;
