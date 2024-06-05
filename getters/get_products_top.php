@@ -37,8 +37,8 @@ if (isset($_POST['getDataButton'])) {
             'year' => ['$substr' => ['$transaction.order_date', 6, 4]]
         ]],
         ['$match' => [
-            'month' => $month,
-            'year' => $year,
+            'month' => ['$in' => $month],
+            'year' => ['$in' => $year],
             'product.category' => $category,
             'product.sub_category' => $sub_category
         ]],

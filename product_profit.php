@@ -26,45 +26,65 @@ require_once "connect.php";
                 <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">Top 5 Products' Profit</h1>
             </div>
 
-            <!-- Input Box -->
-            <div class="bg-white shadow-md rounded-lg p-6 mb-8 justify-start items-start">
-                <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
-                    <option value="" disabled selected>Choose month</option>
-                    <?php
-                    $months = [
-                        "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-                    ];
-                    ?>
-                    <?php foreach ($months as $month) {
-                        echo "<option value='" . $month . "'>" . $month . "</option>";
-                    } ?>
-                </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white shadow-md rounded-lg p-6 mb-8 justify-start items-start">
+                    <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col items-center md:col-span-1">
+                        <h1 id="title" class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Total Profit</h1>
+                        <h2 id="totalProfit" class="text-4xl text-gray-600 font-bold mt-4 text-center md:mb-0">0</h2>
+                    </div>
+                    <select id="month" multiple>
+                        <option value="" disabled>Choose month</option>
+                        <option value="01">01 - January</option>
+                        <option value="02">02 - February</option>
+                        <option value="03">03 - March</option>
+                        <option value="04">04 - April</option>
+                        <option value="05">05 - May</option>
+                        <option value="06">06 - June</option>
+                        <option value="07">07 - July</option>
+                        <option value="08">08 - August</option>
+                        <option value="09">09 - September</option>
+                        <option value="10">10 - October</option>
+                        <option value="11">11 - November</option>
+                        <option value="12">12 - December</option>
+                    </select>
 
-                <select id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
-                    <option value="" disabled selected>Choose year</option>
-                    <?php
-                    $years = [
-                        "2014", "2015", "2016", "2017",
-                    ];
-                    ?>
-                    <?php foreach ($years as $year) {
-                        echo "<option value='" . $year . "'>" . $year . "</option>";
-                    } ?>
-                </select>
-                <button id="getDataButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Get Data
-                </button>
-            </div>
-
-            <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
-                <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Products' Profit</h1>
-                <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
+                    <select id="year" multiple>
+                        <option value="" disabled>Choose year</option>
+                        <?php
+                        $years = [
+                            "2014", "2015", "2016", "2017",
+                        ];
+                        ?>
+                        <?php foreach ($years as $year) {
+                            echo "<option value='" . $year . "'>" . $year . "</option>";
+                        } ?>
+                    </select>
+                    <button id="getDataButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Get Data
+                    </button>
+                </div>
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
+                    <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Products' Profit</h1>
+                    <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
+                </div>
             </div>
         </main>
     </div>
 
     <script>
         $(document).ready(function() {
+            const monthChoices = new Choices('#month', {
+                removeItemButton: true,
+                searchEnabled: false,
+                allowHTML: true,
+            });
+
+            const yearChoices = new Choices('#year', {
+                removeItemButton: true,
+                searchEnabled: false,
+                allowHTML: true,
+            });
+
             const ctx = document.getElementById('chart1').getContext('2d');
             let myChart;
 
@@ -81,13 +101,27 @@ require_once "connect.php";
                         datasets: [{
                             label: 'Total Products\' Profit',
                             data: data.map(item => item.totalProfit),
-                            backgroundColor: '#19376D',
-                            borderColor: '#19376D',
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
                             borderWidth: 1
                         }]
                     },
                     options: {
-                        indexAxis: 'y',
+                        indexAxis: 'x',
                         scales: {
                             x: {
                                 beginAtZero: true,
@@ -124,25 +158,10 @@ require_once "connect.php";
             }
 
             $("#getDataButton").click(function() {
-                var month = $("#month").val();
-                var year = $("#year").val();
-                var monthMapping = {
-                    "January": "01",
-                    "February": "02",
-                    "March": "03",
-                    "April": "04",
-                    "May": "05",
-                    "June": "06",
-                    "July": "07",
-                    "August": "08",
-                    "September": "09",
-                    "October": "10",
-                    "November": "11",
-                    "December": "12"
-                };
+                var months = $("#month").val();
+                var years = $("#year").val();
 
-                month = monthMapping[month];
-                console.log(month, year);
+                console.log(months, years);
 
                 Swal.fire({
                     title: 'Loading...',
@@ -158,8 +177,8 @@ require_once "connect.php";
                     type: 'POST',
                     data: {
                         getDataButton: true,
-                        month: month,
-                        year: year
+                        month: months,
+                        year: years
                     },
                     success: function(data) {
                         console.log(data);
@@ -171,6 +190,16 @@ require_once "connect.php";
                             return;
                         }
                         console.log(parsedData);
+
+                        var totalProfit = parsedData.reduce(function(accumulator, item) {
+                            return accumulator + item.totalProfit;
+                        }, 0);
+                        $('#totalProfit').text(totalProfit);
+
+                        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                        var title = "Profit for " + monthNames[months - 1] + ", " + years;
+                        $('#title').text(title);
+
                         updateChart('chart1', parsedData);
                         Swal.close();
                     },

@@ -6,7 +6,7 @@ $transactions_bridge_products = $client->supermarket->transactions_bridge_produc
 $transactions_bridge_products->createIndex(['order_id' => 1]);
 
 if (isset($_POST['getDataButton'])) {
-    $month = $_POST['month'];
+    $months = $_POST['month'];
     $year = $_POST['year'];
 
     $pipeline = [
@@ -29,8 +29,8 @@ if (isset($_POST['getDataButton'])) {
             'year' => ['$substr' => ['$transaction.order_date', 6, 4]]
         ]],
         ['$match' => [
-            'month' => $month,
-            'year' => $year
+            'month' => ['$in' => $months],
+            'year' => ['$in' => $year]
         ]],
         ['$group' => [
             '_id' => [
@@ -60,4 +60,3 @@ if (isset($_POST['getDataButton'])) {
         echo json_encode(['error' => $e->getMessage()]);
     }
 }
-?>
