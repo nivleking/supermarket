@@ -14,7 +14,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                 $query = "MATCH (p:Product {product_id: '$productId'})<-[:BUY]-(t:Transaction)
                         MATCH (t)-[r:BUY]->(p2:Product)
                         WHERE p2.product_id <> '$productId'
-                        RETURN p2.product_name AS product_name, SUM(r.quantity) AS total_quantity
+                        RETURN p2.product_name AS product_name, SUM(r.quantity) AS total_quantity, p2.category AS category, p2.sub_category AS sub_category
                         ORDER BY total_quantity DESC
                         LIMIT 5;";
                 break;
@@ -24,7 +24,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                         MATCH (t:Transaction)-[:BUY]->(p)
                         MATCH (t)-[:BUY]->(p2:Product)
                         WHERE p2.product_id <> '$productId'
-                        RETURN p2.product_name AS product_name, COUNT(*) AS total_quantity
+                        RETURN p2.product_name AS product_name, COUNT(*) AS total_quantity, p2.category AS category, p2.sub_category AS sub_category
                         ORDER BY total_quantity DESC
                         LIMIT 5;";
                 break;
@@ -35,7 +35,9 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
         foreach ($results as $result) {
             $data[] = [
                 'product_name' => $result->get('product_name', 'N/A'),
-                'total_quantity' => $result->get('total_quantity', 0)
+                'total_quantity' => $result->get('total_quantity', 0),
+                'category' => $result->get('category'),
+                'sub_category' => $result->get('sub_category')
             ];
         }
 
@@ -101,7 +103,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                     <option value="">Choose Product...</option>
                     <?php foreach ($results as $result) {
                         $node = $result->get('p');
-                        echo "<option value='" . $node->getProperty('product_id') . "'>" . $node->getProperty('product_name') . "</option>";
+                        echo "<option value='" . $node->getProperty('product_id') . "'>" . $node->getProperty('product_name') . " (". $node->getProperty('category') . "-" . $node->getProperty('sub_category') . ")" . "</option>";
                     } ?>
                 </select>
 
@@ -201,7 +203,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                                 enabled: true,
                                 callbacks: {
                                     title: function(tooltipItems) {
-                                        return data[tooltipItems[0].dataIndex].product_name;
+                                        return data[tooltipItems[0].dataIndex].product_name + "(" + data[tooltipItems[0].dataIndex].category + "-" + data[tooltipItems[0].dataIndex].sub_category + ")";
                                     },
                                     label: function(tooltipItem) {
                                         return label + `: ${tooltipItem.raw}`;
@@ -235,6 +237,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                         },
                         dataType: 'json',
                         success: function(data) {
+                            console.log(data);
                             setTimeout(() => {
                                 updateChart('chart1', data);
                                 Swal.close();
