@@ -4,29 +4,53 @@ require_once "connect.php";
 
 $transaksi = $client->supermarket->transactions;
 $ship_modes = $transaksi->distinct("ship_mode");
+$region= $transaksi->distinct("region");
 
-function getTotalTransactions($shipMode, $transaksi)
+function getTotalTransactions($shipMode, $region, $transaksi)
 {
-    if ($shipMode == "all") {
+    $filter=[];
+    if ($shipMode == "all" && ($region =="all" || $region == "")) {
+        // echo "1";
         $count = $transaksi->countDocuments();
-    } else {
+    }
+    else if($shipMode != "all" && ($region =="all" || $region =="") ){
         $filter = ['ship_mode' => $shipMode];
         $count = $transaksi->countDocuments($filter);
+        // echo $count;
     }
+    else if($shipMode == "all" && $region != "all"){
+        // echo "3";
+        $filter = ['region' => $region];
+        $count = $transaksi->countDocuments($filter);
+    }
+    else {
+        // echo "4";
+        $filter= ['ship_mode' => $shipMode, 'region' => $region];
+        $count = $transaksi->countDocuments($filter);
+    }
+    // echo "gagal";
+
+
     return $count;
 }
 
 
 
 
-if (isset($_POST['ship_mode'])) {
+if (isset($_POST['ship_mode']) && $_POST['ship_mode'] != '' && $_POST['ship_mode'] != null) {
+    // print_r($_POST);
     $selectedMode = $_POST['ship_mode'];
+    $selectedRegion= $_POST['region'];
+    // echo $selectedMode;
+
+    $responseTimePipeline=[];
 
     // Aggregation pipeline
     $responseTimePipeline = [
         [
             '$project' => [
                 'ship_mode' => 1,
+                'region' => 1,
                 'order_date' => ['$dateFromString' => ['dateString' => '$order_date', 'format' => '%d/%m/%Y']],
                 'ship_date' => ['$dateFromString' => ['dateString' => '$ship_date', 'format' => '%d/%m/%Y']],
                 'diff_days' => [
@@ -39,14 +63,40 @@ if (isset($_POST['ship_mode'])) {
             ]
         ]
     ];
+    
 
-    if ($selectedMode !== 'all') {
+    if ($selectedMode !== 'all' && $selectedMode !== '') {
+        // echo "oke";
         $responseTimePipeline[] = ['$match' => ['ship_mode' => $selectedMode]];
     }
 
+    if($selectedRegion !== 'all' && $selectedRegion !== ''){
+        $responseTimePipeline[] = ['$match' => ['region' => $selectedRegion]];
+    }
+    $groupId = [];
+
+    if ($selectedMode !== 'all' && $selectedMode !== '') {
+        $groupId['ship_mode'] = '$ship_mode';
+    }
+
+    if ($selectedRegion !== 'all' && $selectedRegion !== '') {
+        $groupId['region'] = '$region';
+    }
+
+    
+    if (empty($groupId)) {
+        $groupId = null;  
+    }
+
+    
+
+    
+
+
     $responseTimePipeline[] = [
         '$group' => [
-            '_id' => ($selectedMode === 'all' ? null : '$ship_mode'),
+            
+            '_id' => $groupId,
             'max_diff_days' => ['$max' => '$diff_days'],
             'min_diff_days' => ['$min' => '$diff_days'],
             'avg_diff_days' => ['$avg' => '$diff_days'],
@@ -78,16 +128,21 @@ if (isset($_POST['ship_mode'])) {
         ]
     ];
 
+    // print_r($responseTimePipeline);
+
+    // print_r($responseTimePipeline);
+
     try {
         $responseTimes = $transaksi->aggregate($responseTimePipeline);
         $responseTimesArray = iterator_to_array($responseTimes);
+        // var_dump($responseTimesArray);
         $response = [
             'max_diff_days' => $responseTimesArray[0]->max_diff_days ?? 0,
             'avg_diff_days' => round($responseTimesArray[0]->avg_diff_days ?? 0, 2),
             'min_diff_days' => $responseTimesArray[0]->min_diff_days ?? 0,
             'countMax' => $responseTimesArray[0]->countMax ?? 0,
             'countMin' => $responseTimesArray[0]->countMin ?? 0,
-            'total' => getTotalTransactions($selectedMode, $transaksi)
+            'total' => getTotalTransactions($selectedMode, $selectedRegion, $transaksi)
         ];
         echo json_encode($response);
     } catch (Exception $e) {
@@ -103,6 +158,22 @@ if (isset($_POST['ship_mode'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
+    <style>
+    .tooltip {
+        position: absolute;
+        z-index: 10;
+        left: 105%; 
+        top: 0;
+        background-color: white;
+        border: 1px solid #d1d5db;
+        padding: 8px;
+        border-radius: 8px;
+        width: 200px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+</style>
+
     <?php include 'components/headers.php'; ?>
 </head>
 
@@ -120,13 +191,22 @@ if (isset($_POST['ship_mode'])) {
             <!-- Title Box -->
             <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-start">
                 <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">Statistic Report for Response Time</h1>
-                <select id="ship_mode" aria-label="Select Ship Mode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
-                    <option value="" disabled selected>Select Ship Mode</option>
-                    <option value="all">All Ship Mode</option>
-                    <?php foreach ($ship_modes as $mode) : ?>
-                        <option value="<?= $mode ?>"><?= $mode ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <div>
+                    <select id="ship_mode" aria-label="Select Ship Mode" class="mr-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
+                        <option value="" disabled selected>Select Ship Mode</option>
+                        <option value="all">All Ship Mode</option>
+                        <?php foreach ($ship_modes as $mode) : ?>
+                            <option value="<?= $mode ?>"><?= $mode ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select id="region" aria-label="Select Region" class="mr-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto">
+                        <option value="" disabled selected>Select Region</option>
+                        <option value="all">All Region</option>
+                        <?php foreach ($region as $reg) : ?>
+                            <option value="<?= $reg ?>"><?= $reg ?></option>
+                        <?php endforeach; ?>
+                    </select>   
+                </div>
 
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -223,8 +303,23 @@ if (isset($_POST['ship_mode'])) {
                 });
             }
 
-            $('#ship_mode').change(function() {
-                var selectedMode = $(this).val();
+            $('#ship_mode, #region').change(function() {
+                var selectedMode = $("#ship_mode").val();
+                var selectedRegion= $("#region").val();
+
+                // console.log(selectedMode);
+
+                if (selectedMode == '' || selectedMode == null) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Please Select Ship Mode',
+                        text: 'You need to select a ship mode to show data.',
+                        timer: 3000, 
+                        showConfirmButton: false
+                    });
+                    return; 
+                }
+
                 Swal.fire({
                     title: 'Loading...',
                     text: 'Please wait while we fetch the data',
@@ -238,9 +333,11 @@ if (isset($_POST['ship_mode'])) {
                 $.ajax({
                     type: 'POST',
                     data: {
-                        ship_mode: selectedMode
+                        ship_mode: selectedMode,
+                        region: selectedRegion
                     },
                     success: function(response) {
+                        // console.log(response);
                         var data = JSON.parse(response);
                         console.log(data);
                         setTimeout(function() {
