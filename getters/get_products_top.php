@@ -17,6 +17,16 @@ if (isset($_POST['getDataButton'])) {
     $month = $_POST['month'];
     $year = $_POST['year'];
 
+    $matchStage = [
+        'month' => ['$in' => $month],
+        'year' => ['$in' => $year],
+        'product.category' => $category
+    ];
+
+    if ($sub_category != null) {
+        $matchStage['product.sub_category'] = $sub_category;
+    }
+
     $pipeline = [
         ['$lookup' => [
             'from' => "products",
@@ -36,12 +46,7 @@ if (isset($_POST['getDataButton'])) {
             'month' => ['$substr' => ['$transaction.order_date', 3, 2]],
             'year' => ['$substr' => ['$transaction.order_date', 6, 4]]
         ]],
-        ['$match' => [
-            'month' => ['$in' => $month],
-            'year' => ['$in' => $year],
-            'product.category' => $category,
-            'product.sub_category' => $sub_category
-        ]],
+        ['$match' => $matchStage],
         ['$group' => [
             '_id' => [
                 'name' => '$product.product_name',

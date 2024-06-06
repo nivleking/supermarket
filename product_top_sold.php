@@ -15,7 +15,7 @@ $categories = $products_collection->distinct('category');
     <?php include 'components/headers.php'; ?>
 </head>
 
-<body>
+<body class="bg-gray-100">
     <!-- Navbar -->
     <?php include 'components/navbar.php'; ?>
 
@@ -41,6 +41,11 @@ $categories = $products_collection->distinct('category');
                         <h2 id="totalQuantity" class="text-4xl text-gray-600 font-bold mt-4 text-center md:mb-0">0</h2>
                     </div>
 
+                    <div class="md:ml-auto p-2.5">
+                        <input type="checkbox" id="subCategoryCheck" class="mr-2">
+                        <label for="subCategoryCheck">Sub-category</label>
+                    </div>
+
                     <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" required>
                         <option value="" disabled selected>Choose category</option>
                         <?php foreach ($categories as $category) {
@@ -48,12 +53,8 @@ $categories = $products_collection->distinct('category');
                         } ?>
                     </select>
 
-                    <select id="sub_category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto mb-6" required>
+                    <select id="sub_category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto mb-6" disabled>
                         <option value="" disabled selected>Choose sub-category</option>
-                        <?php
-
-
-                        ?>
                     </select>
 
                     <select id="month" multiple>
@@ -198,19 +199,21 @@ $categories = $products_collection->distinct('category');
             $("#category").change(function() {
                 var category = $(this).val();
                 console.log(category);
-                $.ajax({
-                    url: 'getters/get_sub_categories.php',
-                    type: 'POST',
-                    data: {
-                        category: category
-                    },
-                    success: function(data) {
-                        $('#sub_category').html(data);
-                    },
-                    error: function(error) {
-                        console.log(error);
-                    }
-                });
+                if ($("#subCategoryCheck").is(":checked")) {
+                    $.ajax({
+                        url: 'getters/get_sub_categories.php',
+                        type: 'POST',
+                        data: {
+                            category: category
+                        },
+                        success: function(data) {
+                            $('#sub_category').html(data);
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
+                }
             });
 
             $("#sub_category").change(function() {
@@ -260,6 +263,15 @@ $categories = $products_collection->distinct('category');
                         Swal.close();
                     }
                 });
+            });
+
+            $("#subCategoryCheck").change(function() {
+                if ($(this).is(":checked")) {
+                    $("#sub_category").prop("disabled", false);
+                } else {
+                    $("#sub_category").prop("disabled", true);
+                    $("#sub_category").val("");
+                }
             });
         })
     </script>

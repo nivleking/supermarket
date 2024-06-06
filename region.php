@@ -190,17 +190,9 @@ if (isset($_POST['regions'])) {
         </main>
     </div>
 
+    
     <script>
         $(document).ready(function() {
-
-            function formatNumber(num) {
-                if (num >= 1000) {
-                    return '$' + (num / 1000).toFixed(1) + 'k';
-                }
-                return '$' + num.toFixed(1);
-            }
-
-
             var ctx = $('#barChart').get(0).getContext('2d');
             var myChart;
 

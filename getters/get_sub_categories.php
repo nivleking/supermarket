@@ -15,6 +15,7 @@ if (isset($_POST['category'])) {
     } elseif ($category == "Technology") {
         $sub_categories = $sub_categories_technology;
     }
+    // echo "<option value='category_only'>All sub-categories of $category</option>";
     foreach ($sub_categories as $sub_category) {
         echo "<option value='" . $sub_category . "'>" . $sub_category . "</option>";
     }

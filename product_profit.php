@@ -12,7 +12,7 @@ require_once "connect.php";
     <?php include 'components/headers.php'; ?>
 </head>
 
-<body>
+<body class="bg-gray-100">
     <!-- Navbar -->
     <?php include 'components/navbar.php'; ?>
 
@@ -195,6 +195,7 @@ require_once "connect.php";
                             return accumulator + item.totalProfit;
                         }, 0);
                         $('#totalProfit').text(totalProfit);
+                        // $('#totalProfit').text(formatNumber(totalProfit));
 
                         var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                         var title = "Profit for " + monthNames[months - 1] + ", " + years;
