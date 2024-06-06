@@ -156,6 +156,16 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                 removeItemButton: true,
             });
 
+            function formatNumber(num) {
+                if (num >= 1000000) {
+                    return '$' + (num / 1000000).toFixed(2) + 'M';
+                } else if (num >= 1000) {
+                    return '$' + (num / 1000).toFixed(2) + 'K'; 
+                } else {
+                    return '$' + num.toFixed(2);
+                }
+            }
+
             function updateChart(chartId, data) {
                 var ctx = document.getElementById(chartId).getContext('2d');
                 var label = chartId == "chart1" ? "Total Quantity" : "Frequency";
@@ -275,9 +285,9 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                         dataType: 'json',
                         success: function(data) {
                             setTimeout(() => {
-                                $("#profit").text(data.Total_Sales);
+                                $("#profit").text(formatNumber(data.Total_Profit));
                                 $("#quantity").text(data.Quantity_Sold);
-                                $("#sales").text(data.Total_Profit);
+                                $("#sales").text(formatNumber(data.Total_Sales));
                                 Swal.close();
                             }, 2000);
                         },
