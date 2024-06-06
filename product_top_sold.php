@@ -29,72 +29,71 @@ $categories = $products_collection->distinct('category');
                 <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">Top 5 Products Sold based On Category and Sub-Category</h1>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
-                    <h1 id="title" class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Products Sold based On Category and Sub-Category</h1>
-                    <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
+            <div class="grid grid-cols-2 mt-8 md:grid-cols-2 gap-6">
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 46rem;">
+                    <canvas id="chart1" class="mt-4 p-8"></canvas>
                 </div>
-
-                <div class="bg-white shadow-md rounded-lg p-6 justify-start items-start">
-                    <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col items-center md:col-span-1">
-                        <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Total Quantity Sold</h1>
-                        <h2 id="totalQuantity" class="text-4xl text-gray-600 font-bold mt-4 text-center md:mb-0">0</h2>
+                <div class="flex flex-col gap-6">
+                    <div class="bg-white shadow-md rounded-lg p-6 mb-4 flex flex-col items-center md:col-span-1">
+                        <div id="totalQuantity" class="text-4xl font-bold text-center text-gray-800">-</div>
+                        <div class="text-center text-gray-500">Total Profit</div>
                     </div>
+                    <div class="bg-white shadow-md rounded-lg p-6 justify-start items-start">
+                        <div class="md:ml-auto p-2.5 mb-3">
+                            <input type="checkbox" id="subCategoryCheck" class="mr-2">
+                            <label for="subCategoryCheck">Sub-category</label>
+                        </div>
 
-                    <div class="md:ml-auto p-2.5">
-                        <input type="checkbox" id="subCategoryCheck" class="mr-2">
-                        <label for="subCategoryCheck">Sub-category</label>
+                        <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" required>
+                            <option value="" disabled selected>Choose category</option>
+                            <?php foreach ($categories as $category) {
+                                echo "<option value='" . $category . "'>" . $category . "</option>";
+                            } ?>
+                        </select>
+
+                        <select id="sub_category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto mb-6" disabled>
+                            <option value="" disabled selected>Choose sub-category</option>
+                        </select>
+
+                        <select id="month" multiple>
+                            <option value="" disabled>Choose month</option>
+
+                            <?php
+                            $months = [
+                                "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
+                            ];
+                            ?>
+                            <option value="01">01 - January</option>
+                            <option value="02">02 - February</option>
+                            <option value="03">03 - March</option>
+                            <option value="04">04 - April</option>
+                            <option value="05">05 - May</option>
+                            <option value="06">06 - June</option>
+                            <option value="07">07 - July</option>
+                            <option value="08">08 - August</option>
+                            <option value="09">09 - September</option>
+                            <option value="10">10 - October</option>
+                            <option value="11">11 - November</option>
+                            <option value="12">12 - December</option>
+                        </select>
+
+                        <select id="year" multiple>
+                            <option value="" disabled>Choose year</option>
+                            <?php
+                            $years = [
+                                "2014", "2015", "2016", "2017",
+                            ];
+                            ?>
+                            <?php foreach ($years as $year) {
+                                echo "<option value='" . $year . "'>" . $year . "</option>";
+                            } ?>
+                        </select>
+
+
+                        <button id="getDataButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-8">
+                            Get Data
+                        </button>
                     </div>
-
-                    <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" required>
-                        <option value="" disabled selected>Choose category</option>
-                        <?php foreach ($categories as $category) {
-                            echo "<option value='" . $category . "'>" . $category . "</option>";
-                        } ?>
-                    </select>
-
-                    <select id="sub_category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto mb-6" disabled>
-                        <option value="" disabled selected>Choose sub-category</option>
-                    </select>
-
-                    <select id="month" multiple>
-                        <option value="" disabled>Choose month</option>
-
-                        <?php
-                        $months = [
-                            "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
-                        ];
-                        ?>
-                        <option value="01">01 - January</option>
-                        <option value="02">02 - February</option>
-                        <option value="03">03 - March</option>
-                        <option value="04">04 - April</option>
-                        <option value="05">05 - May</option>
-                        <option value="06">06 - June</option>
-                        <option value="07">07 - July</option>
-                        <option value="08">08 - August</option>
-                        <option value="09">09 - September</option>
-                        <option value="10">10 - October</option>
-                        <option value="11">11 - November</option>
-                        <option value="12">12 - December</option>
-                    </select>
-
-                    <select id="year" multiple>
-                        <option value="" disabled>Choose year</option>
-                        <?php
-                        $years = [
-                            "2014", "2015", "2016", "2017",
-                        ];
-                        ?>
-                        <?php foreach ($years as $year) {
-                            echo "<option value='" . $year . "'>" . $year . "</option>";
-                        } ?>
-                    </select>
-
-
-                    <button id="getDataButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-8">
-                        Get Data
-                    </button>
                 </div>
             </div>
         </main>
@@ -160,7 +159,7 @@ $categories = $products_collection->distinct('category');
                         }]
                     },
                     options: {
-                        indexAxis: 'x',
+                        indexAxis: 'y',
                         scales: {
                             x: {
                                 beginAtZero: true,
@@ -177,6 +176,13 @@ $categories = $products_collection->distinct('category');
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top 5 Products Sold based On Category and Sub-Category',
+                                font: {
+                                    size: 14
+                                }
+                            },
                             legend: {
                                 display: false
                             },

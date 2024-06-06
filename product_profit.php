@@ -26,51 +26,54 @@ require_once "connect.php";
                 <h1 class="text-3xl font-bold text-start mb-4 md:mb-0">Top 5 Products' Profit</h1>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white shadow-md rounded-lg p-6 mb-8 justify-start items-start">
-                    <div class="bg-white shadow-md rounded-lg p-6 mb-8 flex flex-col items-center md:col-span-1">
-                        <h1 id="title" class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Total Profit</h1>
-                        <h2 id="totalProfit" class="text-4xl text-gray-600 font-bold mt-4 text-center md:mb-0">0</h2>
+            <div class="grid grid-cols-2 mt-8 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-6">
+                    <div class="bg-white shadow-md rounded-lg p-6 h-30 justify-center items-center">
+                        <div id="totalProfit" class="text-4xl font-bold text-center text-gray-800">-</div>
+                        <div class="text-center text-gray-500">Total Profit</div>
                     </div>
-                    <select id="month" multiple>
-                        <option value="" disabled>Choose month</option>
-                        <option value="01">01 - January</option>
-                        <option value="02">02 - February</option>
-                        <option value="03">03 - March</option>
-                        <option value="04">04 - April</option>
-                        <option value="05">05 - May</option>
-                        <option value="06">06 - June</option>
-                        <option value="07">07 - July</option>
-                        <option value="08">08 - August</option>
-                        <option value="09">09 - September</option>
-                        <option value="10">10 - October</option>
-                        <option value="11">11 - November</option>
-                        <option value="12">12 - December</option>
-                    </select>
 
-                    <select id="year" multiple>
-                        <option value="" disabled>Choose year</option>
-                        <?php
-                        $years = [
-                            "2014", "2015", "2016", "2017",
-                        ];
-                        ?>
-                        <?php foreach ($years as $year) {
-                            echo "<option value='" . $year . "'>" . $year . "</option>";
-                        } ?>
-                    </select>
-                    <button id="getDataButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Get Data
-                    </button>
+                    <div class="bg-white shadow-md rounded-lg p-6 justify-start items-start">
+                        <select id="month" multiple>
+                            <option value="" disabled>Choose month</option>
+                            <option value="01">01 - January</option>
+                            <option value="02">02 - February</option>
+                            <option value="03">03 - March</option>
+                            <option value="04">04 - April</option>
+                            <option value="05">05 - May</option>
+                            <option value="06">06 - June</option>
+                            <option value="07">07 - July</option>
+                            <option value="08">08 - August</option>
+                            <option value="09">09 - September</option>
+                            <option value="10">10 - October</option>
+                            <option value="11">11 - November</option>
+                            <option value="12">12 - December</option>
+                        </select>
+
+                        <select id="year" multiple>
+                            <option value="" disabled>Choose year</option>
+                            <?php
+                            $years = [
+                                "2014", "2015", "2016", "2017",
+                            ];
+                            ?>
+                            <?php foreach ($years as $year) {
+                                echo "<option value='" . $year . "'>" . $year . "</option>";
+                            } ?>
+                        </select>
+                        <button id="getDataButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Get Data
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 45rem;">
-                    <h1 class="text-2xl text-gray-400 font-bold mt-4 text-center md:mb-0">Top 5 Products' Profit</h1>
-                    <canvas id="chart1" class="mb-16 ml-4 mr-8"></canvas>
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center md:col-span-1" style="height: 46rem;">
+                    <canvas id="chart1" class="mt-4 p-8"></canvas>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="components/functions.js"></script>
     <script>
         $(document).ready(function() {
             const monthChoices = new Choices('#month', {
@@ -138,6 +141,13 @@ require_once "connect.php";
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
+                            title: {
+                                display: true,
+                                text: 'Top 5 Products\' Profit',
+                                font: {
+                                    size: 14
+                                }
+                            },
                             legend: {
                                 display: false
                             },
@@ -148,7 +158,7 @@ require_once "connect.php";
                                         return data[tooltipItems[0].dataIndex].name;
                                     },
                                     label: function(tooltipItem) {
-                                        return 'Total Profit: ' + tooltipItem.raw;
+                                        return 'Total Profit: ' + formatNumber(tooltipItem.raw);
                                     }
                                 }
                             }
@@ -194,7 +204,7 @@ require_once "connect.php";
                         var totalProfit = parsedData.reduce(function(accumulator, item) {
                             return accumulator + item.totalProfit;
                         }, 0);
-                        $('#totalProfit').text(totalProfit);
+                        $('#totalProfit').text(formatNumber(totalProfit));
                         // $('#totalProfit').text(formatNumber(totalProfit));
 
                         var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

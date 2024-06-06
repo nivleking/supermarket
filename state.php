@@ -102,7 +102,10 @@ require_once "connect.php";
                     plugins: {
                         title: {
                             display: true,
-                            text: state === 'all_states' ? 'Total Transactions by State' : 'Total Transactions by City in ' + state
+                            text: state === 'all_states' ? 'Total Transactions by State' : 'Total Transactions by City in ' + state,
+                            font: {
+                                size: 14
+                            }
                         }
                     },
                     scales: {
@@ -116,6 +119,15 @@ require_once "connect.php";
 
         $('#getDataButton').click(function() {
             const state = $('#state').val();
+
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait while we fetch the data',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
             $.ajax({
                 url: 'getters/get_state_cities.php',
@@ -157,9 +169,12 @@ require_once "connect.php";
                         "paging": true,
                         "searching": true
                     });
+
+                    Swal.close();
                 },
                 error: function(response) {
                     console.error('Error fetching data:', response);
+                    Swal.close();
                 }
             });
         });

@@ -143,6 +143,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
         </main>
     </div>
 
+    <script src="components/functions.js"></script>
     <script>
         $(document).ready(function() {
             const ctx = document.getElementById('chart1').getContext('2d');
@@ -155,16 +156,6 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                 shouldSort: false,
                 removeItemButton: true,
             });
-
-            function formatNumber(num) {
-                if (num >= 1000000) {
-                    return '$' + (num / 1000000).toFixed(2) + 'M';
-                } else if (num >= 1000) {
-                    return '$' + (num / 1000).toFixed(2) + 'K'; 
-                } else {
-                    return '$' + num.toFixed(2);
-                }
-            }
 
             function updateChart(chartId, data) {
                 var ctx = document.getElementById(chartId).getContext('2d');
