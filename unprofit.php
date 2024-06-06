@@ -179,6 +179,12 @@ if (isset($_POST['regions']) || isset($_POST['years'])) {
 
     <script>
         $(document).ready(function() {
+            function formatNumber(num) {
+                if (num >= 1000) {
+                    return '$' + (num / 1000).toFixed(1) + 'k';
+                }
+                return '$' + num.toFixed(1);
+            }
             var ctx = $('#barChart').get(0).getContext('2d');
             var myChart;
 
@@ -227,7 +233,7 @@ if (isset($_POST['regions']) || isset($_POST['years'])) {
                                         return data[tooltipItems[0].dataIndex].product_name;
                                     },
                                     label: function(tooltipItem) {
-                                        return 'Total Loss: ' + tooltipItem.raw;
+                                        return 'Total Loss: ' + formatNumber(tooltipItem.raw);
                                     }
                                 }
                             }

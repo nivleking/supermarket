@@ -31,7 +31,7 @@ if (isset($_POST['regions'])) {
                 'total_profit' => ['$sum' => '$profit']
             ]
         ],
-        ['$sort' => ['_id' => 1]], // Menambahkan langkah sort di sini
+        ['$sort' => ['_id' => 1]],
         [
             '$group' => [
                 '_id' => null,
@@ -64,7 +64,7 @@ if (isset($_POST['regions'])) {
             ]
         ]
     ];
-    
+
 
     if ($_POST['regions'] == 'ar') {
         $pipeline = $pipelineBase;
@@ -192,6 +192,15 @@ if (isset($_POST['regions'])) {
 
     <script>
         $(document).ready(function() {
+
+            function formatNumber(num) {
+                if (num >= 1000) {
+                    return '$' + (num / 1000).toFixed(1) + 'k';
+                }
+                return '$' + num.toFixed(1);
+            }
+
+
             var ctx = $('#barChart').get(0).getContext('2d');
             var myChart;
 
@@ -220,14 +229,15 @@ if (isset($_POST['regions'])) {
                         var data = JSON.parse(response);
                         console.log(data);
 
-                        $('#totalSales').text(data.total_sales);
-                        $('#totalProfit').text(data.total_profit);
-                        $('#maxSales').text(data.max_sales);
-                        $('#minSales').text(data.min_sales);
-                        $('#avgSales').text(data.avg_sales);
-                        $('#maxProfit').text(data.max_profit);
-                        $('#minProfit').text(data.min_profit);
-                        $('#avgProfit').text(data.avg_profit);
+                        $('#totalSales').text(formatNumber(data.total_sales));
+                        $('#totalProfit').text(formatNumber(data.total_profit));
+                        $('#maxSales').text(formatNumber(data.max_sales));
+                        $('#minSales').text(formatNumber(data.min_sales));
+                        $('#avgSales').text(formatNumber(data.avg_sales));
+                        $('#maxProfit').text(formatNumber(data.max_profit));
+                        $('#minProfit').text(formatNumber(data.min_profit));
+                        $('#avgProfit').text(formatNumber(data.avg_profit));
+
 
                         updateChart(data.years);
                         Swal.close();
@@ -298,4 +308,5 @@ if (isset($_POST['regions'])) {
         });
     </script>
 </body>
+
 </html>
