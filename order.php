@@ -211,6 +211,10 @@ if (isset($_POST['ship_mode']) && $_POST['ship_mode'] != '' && $_POST['ship_mode
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="minResponseTime">-</div>
+                    <div class="text-center text-gray-500">Min Response Time</div>
+                </div>
+                <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
                     <div class="text-4xl font-bold text-center text-gray-800" id="avgResponseTime">-</div>
                     <div class="text-center text-gray-500">Average Response Time</div>
                 </div>
@@ -218,10 +222,7 @@ if (isset($_POST['ship_mode']) && $_POST['ship_mode'] != '' && $_POST['ship_mode
                     <div class="text-4xl font-bold text-center text-gray-800" id="maxResponseTime">-</div>
                     <div class="text-center text-gray-500">Max Response Time</div>
                 </div>
-                <div class="bg-white shadow-md rounded-lg p-6 h-60 flex flex-col justify-center items-center">
-                    <div class="text-4xl font-bold text-center text-gray-800" id="minResponseTime">-</div>
-                    <div class="text-center text-gray-500">Min Response Time</div>
-                </div>
+
             </div>
 
             <div class="grid grid-cols-1 mt-8 md:grid-cols-3 gap-6">
