@@ -34,6 +34,14 @@
                     <span class="ms-3">Loss-Making Product</span>
                 </a>
             </li>
+            <li>
+                <a href="region.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'region.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'region.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z" />
+                    </svg>
+                    <span class="flex-1 ms-3 whitespace-nowrap">Region Sales & Profit</span>
+                </a>
+            </li>
 
             <li>
                 <a href="order.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'order.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
@@ -57,14 +65,6 @@
                         <path d="M64 64C28.7 64 0 92.7 0 128V384c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H64zm64 320H64V320c35.3 0 64 28.7 64 64zM64 192V128h64c0 35.3-28.7 64-64 64zM448 384c0-35.3 28.7-64 64-64v64H448zm64-192c-35.3 0-64-28.7-64-64h64v64zM288 160a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
                     </svg>
                     <span class="ms-3">State's Total Transaction</span>
-                </a>
-            </li>
-            <li>
-                <a href="region.php" class="flex items-center p-2 <?php echo (basename($_SERVER['PHP_SELF']) == 'region.php') ? 'text-black' : 'text-gray-300'; ?> rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                    <svg class="flex-shrink-0 w-5 h-5 <?php echo (basename($_SERVER['PHP_SELF']) == 'region.php') ? 'text-black' : 'text-gray-500'; ?>  transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z" />
-                    </svg>
-                    <span class="flex-1 ms-3 whitespace-nowrap">Region Sales & Profit</span>
                 </a>
             </li>
 
