@@ -190,7 +190,7 @@ if (isset($_POST['regions'])) {
         </main>
     </div>
 
-    
+
     <script>
         $(document).ready(function() {
             var ctx = $('#barChart').get(0).getContext('2d');
@@ -234,8 +234,9 @@ if (isset($_POST['regions'])) {
                         updateChart(data.years);
                         Swal.close();
                     },
-                    error: function() {
-                        Swal.fire('Error', 'Error fetching data', 'error');
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching data: ' + textStatus, errorThrown);
+                        Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                     }
                 });
             }

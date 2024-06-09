@@ -172,9 +172,9 @@ require_once "connect.php";
 
                     Swal.close();
                 },
-                error: function(response) {
-                    console.error('Error fetching data:', response);
-                    Swal.close();
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching data: ' + textStatus, errorThrown);
+                    Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                 }
             });
         });

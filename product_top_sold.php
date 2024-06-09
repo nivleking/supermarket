@@ -13,6 +13,10 @@ $categories = $products_collection->distinct('category');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket</title>
     <?php include 'components/headers.php'; ?>
+
+    <style>
+
+    </style>
 </head>
 
 <body class="bg-gray-100">
@@ -34,29 +38,30 @@ $categories = $products_collection->distinct('category');
                     <canvas id="chart1" class="mt-4 p-8"></canvas>
                 </div>
                 <div class="flex flex-col gap-6">
-                    <div class="bg-white shadow-md rounded-lg p-6 mb-4 flex flex-col items-center md:col-span-1">
-                        <div id="totalQuantity" class="text-4xl font-bold text-center text-gray-800">-</div>
-                        <div class="text-center text-gray-500">Total Profit</div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
+                        <div class="bg-white shadow-md rounded-lg p-6 flex flex-col items-center md:col-span-1">
+                            <div id="totalQuantityTop5" class="text-4xl font-bold text-center text-gray-800">-</div>
+                            <div class="text-center text-gray-500">Total Top 5 Quantity</div>
+                        </div>
+                        <div class="bg-white shadow-md rounded-lg p-6 flex flex-col items-center md:col-span-1">
+                            <div id="totalQuantityAll" class="text-4xl font-bold text-center text-gray-800">-</div>
+                            <div class="text-center text-gray-500">Total All Quantity</div>
+                        </div>
                     </div>
                     <div class="bg-white shadow-md rounded-lg p-6 justify-start items-start">
-                        <div class="md:ml-auto p-2.5 mb-3">
-                            <input type="checkbox" id="subCategoryCheck" class="mr-2">
-                            <label for="subCategoryCheck">Sub-category</label>
-                        </div>
-
                         <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto" required>
-                            <option value="" disabled selected>Choose category</option>
+                            <option value="" selected>Choose category</option>
                             <?php foreach ($categories as $category) {
                                 echo "<option value='" . $category . "'>" . $category . "</option>";
                             } ?>
                         </select>
 
-                        <select id="sub_category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto mb-6" disabled>
-                            <option value="" disabled selected>Choose sub-category</option>
+                        <select id="sub_category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 md:ml-auto mb-6">
+                            <option value="" selected>Choose sub-category</option>
                         </select>
 
                         <select id="month" multiple>
-                            <option value="" disabled>Choose month</option>
+                            <option value="">Choose month</option>
 
                             <?php
                             $months = [
@@ -78,7 +83,7 @@ $categories = $products_collection->distinct('category');
                         </select>
 
                         <select id="year" multiple>
-                            <option value="" disabled>Choose year</option>
+                            <option value="">Choose year</option>
                             <?php
                             $years = [
                                 "2014", "2015", "2016", "2017",
@@ -115,12 +120,17 @@ $categories = $products_collection->distinct('category');
                 removeItemButton: true,
                 searchEnabled: false,
                 allowHTML: true,
+                shouldSort: true,
+                resetScrollPosition: true,
             });
 
             const yearChoices = new Choices('#year', {
                 removeItemButton: true,
                 searchEnabled: false,
                 allowHTML: true,
+                shouldSort: true,
+                resetScrollPosition: true,
+
             });
 
             const ctx = document.getElementById('chart1').getContext('2d');
@@ -205,21 +215,19 @@ $categories = $products_collection->distinct('category');
             $("#category").change(function() {
                 var category = $(this).val();
                 console.log(category);
-                if ($("#subCategoryCheck").is(":checked")) {
-                    $.ajax({
-                        url: 'getters/get_sub_categories.php',
-                        type: 'POST',
-                        data: {
-                            category: category
-                        },
-                        success: function(data) {
-                            $('#sub_category').html(data);
-                        },
-                        error: function(error) {
-                            console.log(error);
-                        }
-                    });
-                }
+                $.ajax({
+                    url: 'getters/get_sub_categories.php',
+                    type: 'POST',
+                    data: {
+                        category: category
+                    },
+                    success: function(data) {
+                        $('#sub_category').html('<option value="" selected>Choose sub-category</option>' + data);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
             });
 
             $("#sub_category").change(function() {
@@ -258,26 +266,24 @@ $categories = $products_collection->distinct('category');
                     success: function(data) {
                         var parsedData = JSON.parse(data);
                         console.log(parsedData);
-                        updateChart('chart1', parsedData);
-                        var totalQuantity = parsedData.reduce((total, item) => total + item.totalQuantity, 0);
-                        $("#totalQuantity").text(totalQuantity);
+                        var topProducts = parsedData.topProducts;
+                        var total5Quantity = 0;
+                        for (var i = 0; i < topProducts.length; i++) {
+                            total5Quantity += topProducts[i].totalQuantity;
+                        }
+                        $("#totalQuantityTop5").text(total5Quantity);
+
+                        var totalQuantity = parsedData.totalQuantity;
+                        updateChart('chart1', topProducts);
+                        $("#totalQuantityAll").text(totalQuantity);
                         updateTitle(category, sub_category);
                         Swal.close();
                     },
                     error: function(error) {
-                        console.log(error);
-                        Swal.close();
+                        console.error('Error fetching data: ' + textStatus, errorThrown);
+                        Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                     }
                 });
-            });
-
-            $("#subCategoryCheck").change(function() {
-                if ($(this).is(":checked")) {
-                    $("#sub_category").prop("disabled", false);
-                } else {
-                    $("#sub_category").prop("disabled", true);
-                    $("#sub_category").val("");
-                }
             });
         })
     </script>

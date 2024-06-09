@@ -28,11 +28,16 @@ require_once "connect.php";
 
             <div class="grid grid-cols-2 mt-8 md:grid-cols-2 gap-6">
                 <div class="flex flex-col gap-6">
-                    <div class="bg-white shadow-md rounded-lg p-6 h-30 justify-center items-center">
-                        <div id="totalProfit" class="text-4xl font-bold text-center text-gray-800">-</div>
-                        <div class="text-center text-gray-500">Total Profit</div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
+                        <div class="bg-white shadow-md rounded-lg p-6 flex flex-col items-center md:col-span-1">
+                            <div id="totalProfit5Top" class="text-4xl font-bold text-center text-gray-800">-</div>
+                            <div class="text-center text-gray-500">Total Top 5 Profit</div>
+                        </div>
+                        <div class="bg-white shadow-md rounded-lg p-6 flex flex-col items-center md:col-span-1">
+                            <div id="totalProfitAll" class="text-4xl font-bold text-center text-gray-800">-</div>
+                            <div class="text-center text-gray-500">Total All Profit</div>
+                        </div>
                     </div>
-
                     <div class="bg-white shadow-md rounded-lg p-6 justify-start items-start">
                         <select id="month" multiple>
                             <option value="" disabled>Choose month</option>
@@ -192,31 +197,29 @@ require_once "connect.php";
                     },
                     success: function(data) {
                         console.log(data);
-                        try {
-                            var parsedData = JSON.parse(data);
-                        } catch (error) {
-                            console.log(error);
-                            Swal.close();
-                            return;
-                        }
+                        
+                        var parsedData = JSON.parse(data);
                         console.log(parsedData);
 
-                        var totalProfit = parsedData.reduce(function(accumulator, item) {
-                            return accumulator + item.totalProfit;
-                        }, 0);
-                        $('#totalProfit').text(formatNumber(totalProfit));
-                        // $('#totalProfit').text(formatNumber(totalProfit));
+                        var topProducts = parsedData.topProducts;
+                        var total5Profit = 0;
+                        topProducts.forEach(product => {
+                            total5Profit += product.totalProfit;
+                        });
+                        $('#totalProfit5Top').text(formatNumber(total5Profit));
+                        updateChart('chart1', topProducts);
+
+                        var totalProfit = parsedData.totalProfit;
+                        $('#totalProfitAll').text(formatNumber(totalProfit));
 
                         var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                         var title = "Profit for " + monthNames[months - 1] + ", " + years;
                         $('#title').text(title);
-
-                        updateChart('chart1', parsedData);
                         Swal.close();
                     },
                     error: function(error) {
-                        console.log(error);
-                        Swal.close();
+                        console.error('Error fetching data: ' + textStatus, errorThrown);
+                        Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                     }
                 });
             });

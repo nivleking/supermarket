@@ -247,6 +247,15 @@ if (isset($_POST['regions']) || isset($_POST['years'])) {
                 var selectedYears = $('#years').val();
                 console.log(selectedRegion, selectedYears);
 
+                Swal.fire({
+                    title: 'Loading...',
+                    text: 'Please wait while we fetch the data',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 $.ajax({
                     type: 'POST',
                     url: 'unprofit.php',
@@ -258,6 +267,11 @@ if (isset($_POST['regions']) || isset($_POST['years'])) {
                         var data = JSON.parse(response);
                         console.log(data);
                         updateChart(data);
+                        Swal.close();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching data: ' + textStatus, errorThrown);
+                        Swal.fire('Error!', 'Failed to fetch data: ' + textStatus, 'error');
                     }
                 });
             }
