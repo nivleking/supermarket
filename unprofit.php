@@ -59,7 +59,6 @@ if (isset($_POST['regions']) || isset($_POST['years'])) {
         ]
     ];
 
-    // Add filter for region if selectedRegion is not 'ar'
     if ($selectedRegion !== 'ar') {
         $pipeline[] = [
             '$match' => [
@@ -68,7 +67,6 @@ if (isset($_POST['regions']) || isset($_POST['years'])) {
         ];
     }
 
-    // Add filter for year if selectedYear is not 'ay'
     if ($selectedYear !== 'ay') {
         $pipeline[] = [
             '$addFields' => [
