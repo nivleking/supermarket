@@ -45079,5 +45079,14 @@
   "city": "Loveland",
   "state": "Colorado",
   "region": "West"
- }
+ },
+ {
+    "order_id": "CA-2017-156721",
+    "order_date": "30\/12\/2017",
+    "ship_date": "03\/01\/2018",
+    "ship_mode": "Standard Class",
+    "city": "Loveland",
+    "state": "Colorado",
+    "region": "West"
+}
 ]
