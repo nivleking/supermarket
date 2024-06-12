@@ -49,7 +49,8 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                 RETURN p.product_name AS Product, 
                 sum(r.sales) AS Total_Sales, 
                 sum(r.quantity) AS Quantity_Sold, 
-                sum(r.profit) AS Total_Profit";
+                sum(r.profit) AS Total_Profit,
+                COUNT(*) AS Transactions";
     
         $results = $clientNeo->run($query);
         $data = [];
@@ -58,7 +59,8 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                 'Product' => $result->get('Product'),
                 'Total_Sales' => $result->get('Total_Sales'),
                 'Quantity_Sold' => $result->get('Quantity_Sold'),
-                'Total_Profit' => $result->get('Total_Profit')
+                'Total_Profit' => $result->get('Total_Profit'),
+                'Transactions' => $result->get('Transactions'),
             ];
         }
         echo json_encode($data);
@@ -109,11 +111,16 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
 
 
             </div>
-            <div class="grid grid-cols-1 mt-4 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 mt-4 md:grid-cols-4 gap-4">
 
                 <div class="bg-white shadow-md rounded-lg flex flex-col items-center justify-center items-center md:col-span-1" style="height: 20rem;">
                     <div class="text-4xl font-bold text-center text-gray-800" id="profit">-</div>
                     <div class="text-center text-gray-500">Product's Profit</div>
+                </div>
+
+                <div class="bg-white shadow-md rounded-lg flex flex-col items-center justify-center items-center md:col-span-1" style="height: 20rem;">
+                    <div class="text-4xl font-bold text-center text-gray-800" id="transaction">-</div>
+                    <div class="text-center text-gray-500">Number of Transactions</div>
                 </div>
 
                 <div class="bg-white shadow-md rounded-lg flex flex-col items-cente justify-center md:col-span-1" style="height: 20rem;">
@@ -279,6 +286,7 @@ if (isset($_POST['product_id']) && isset($_POST['analysis_type'])) {
                                 $("#profit").text(formatNumber(data.Total_Profit));
                                 $("#quantity").text(data.Quantity_Sold);
                                 $("#sales").text(formatNumber(data.Total_Sales));
+                                $("#transaction").text(data.Transactions);
                                 Swal.close();
                             }, 2000);
                         },
