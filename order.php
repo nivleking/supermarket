@@ -264,7 +264,7 @@ if (isset($_POST['ship_mode']) && $_POST['ship_mode'] != '' && $_POST['ship_mode
                     data: {
                         labels: ['Count Max', 'Count Min'],
                         datasets: [{
-                            label: 'Counts of Transactions',
+                            label: '',
                             data: [data.countMax, data.countMin],
                             backgroundColor: [
                                 'rgba(75, 192, 192, 0.2)',
@@ -296,8 +296,7 @@ if (isset($_POST['ship_mode']) && $_POST['ship_mode'] != '' && $_POST['ship_mode
                                 }
                             },
                             legend: {
-                                display: true,
-                                position: 'top'
+                                display: false
                             }
                         }
                     }
